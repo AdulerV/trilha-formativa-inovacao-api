@@ -364,7 +364,7 @@ Para utilizar a plataforma completa, é necessário que a API esteja configurada
 
 ### Frontend
 
-<LINK_DO_FRONTEND>
+https://github.com/SophiaMFerreira/trilha-formativa-inovacao-frontend
 
 ### Backend / API
 
