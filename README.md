@@ -41,6 +41,19 @@ mysql --version
 
 ---
 
+### Espaço em disco
+
+Recomenda-se possuir **pelo menos 1 GB de espaço livre em disco para este projeto**.
+
+Esse espaço contempla a aplicação, suas dependências, arquivos de configuração, banco de dados e arquivos temporários utilizados durante a execução.
+
+Para a instalação completa da plataforma, considerando **Frontend e API**, recomenda-se reservar aproximadamente **2 GB de espaço livre**, sendo:
+
+* **Frontend:** aproximadamente 1 GB
+* **API:** aproximadamente 1 GB
+
+> **Observação:** o espaço necessário pode variar de acordo com o ambiente de desenvolvimento e com o volume de dados armazenado durante a utilização da plataforma.
+
 ## Instalação
 
 ### Clone o repositório
