@@ -20,10 +20,11 @@ class QuestaoController
 
             QuestaoDTO::create($dados, null, $missao);
 
-            $this->missaoService->atualizar($missao);
+            $idQuestao = $this->missaoService->atualizar($missao);
 
             Response::json([
-                "mensagem" => "Questão salva com sucesso!"
+                "mensagem" => "Questão salva com sucesso!",
+                "idQuestao" =>  $idQuestao
             ]);
         } catch (DomainException $e) {
             Response::error($e->getMessage(), 400);
