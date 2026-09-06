@@ -55,6 +55,29 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `mydb`.`RECUPERACAO_SENHA`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`RECUPERACAO_SENHA` (
+  `IdRecuperacaoSenha` INT NOT NULL AUTO_INCREMENT,
+  `IdUsuario` INT NOT NULL,
+  `HashToken` CHAR(64) NOT NULL,
+  `DataCriacao` DATETIME NOT NULL,
+  `DataExpiracao` DATETIME NOT NULL,
+  `DataUtilizacao` DATETIME NULL DEFAULT NULL,
+  `EnderecoIp` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`IdRecuperacaoSenha`),
+  UNIQUE INDEX `HashToken_UNIQUE` (`HashToken` ASC),
+  INDEX `fk_RECUPERACAO_SENHA_USUARIO1_idx` (`IdUsuario` ASC),
+  INDEX `RecuperacaoSenha_Expiracao_idx` (`DataExpiracao` ASC),
+  CONSTRAINT `fk_RECUPERACAO_SENHA_USUARIO1`
+    FOREIGN KEY (`IdUsuario`)
+    REFERENCES `mydb`.`USUARIO` (`IdUsuario`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `mydb`.`TEMATICA`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`TEMATICA` (
@@ -544,4 +567,4 @@ ADD CONSTRAINT fk_ALTERNATIVA_SEQUENCIA_ALTERNATIVA1
 FOREIGN KEY (IdAlternativa)
 REFERENCES ALTERNATIVA(IdAlternativa)
 ON DELETE CASCADE
-ON UPDATE CASCADE;
+ON UPDATE CASCADE;

@@ -22,6 +22,7 @@ require_once __DIR__ . '/../src/config/routes/alternativa.php';
 require_once __DIR__ . '/../src/config/routes/questao.php';
 require_once __DIR__ . '/../src/config/routes/missao.php';
 require_once __DIR__ . '/../src/config/routes/alternativaMarcada.php';
+require_once __DIR__ . '/../src/config/routes/recuperacaoSenha.php';
 
 $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 

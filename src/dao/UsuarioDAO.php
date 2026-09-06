@@ -195,6 +195,28 @@ class UsuarioDAO
         }
     }
 
+    /**
+     * Atualiza somente o hash da senha.
+     *
+     * Existe separado de atualizar() de propósito: a redefinição de
+     * senha não deve tocar em nome, e-mail, ocupação ou qualquer outro
+     * campo do cadastro.
+     */
+    public function atualizarHashSenha(int $idUsuario, string $hashSenha): void
+    {
+        try {
+            $sql = "UPDATE usuario SET HashSenha = :hashSenha WHERE IdUsuario = :idUsuario";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":hashSenha", $hashSenha);
+            $stmt->bindValue(":idUsuario", $idUsuario);
+
+            $stmt->execute();
+        } catch (PDOException) {
+            throw new Exception("Erro ao atualizar a senha do usuário de ID igual a {$idUsuario}");
+        }
+    }
+
     public function deletar(int $idUsuario)
     {
         try {
