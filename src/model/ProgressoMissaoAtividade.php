@@ -21,6 +21,29 @@ class ProgressoMissaoAtividade extends ProgressoMissao
         $this->setPontuacaoObtida($pontuacaoObtida);
     }
 
+    /**
+     * Reconstrói o progresso de atividade já persistido.
+     *
+     * Complementa ProgressoMissao::rehidratar() com os campos da
+     * especialização, também sem revalidar: tentativas acima do limite
+     * atual ou pontuação acima da pontuação vigente da missão são
+     * dados históricos legítimos, não motivo para derrubar a listagem.
+     */
+    public static function rehidratarAtividade(
+        Usuario $usuario,
+        Missao $missao,
+        int $progresso,
+        int $tentativasRealizadas,
+        float $pontuacaoObtida
+    ): self {
+        $instancia = self::rehidratar($usuario, $missao, $progresso);
+
+        $instancia->tentativasRealizadas = $tentativasRealizadas;
+        $instancia->pontuacaoObtida = $pontuacaoObtida;
+
+        return $instancia;
+    }
+
     #[Override]
     public function setProgresso(int $progresso): ProgressoMissao
     {

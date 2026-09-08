@@ -1,5 +1,35 @@
 <?php
 
+/*
+ * Servidor embutido do PHP (php -S ... public/index.php): quando um
+ * script de rota é informado, TODA requisição passa por ele, inclusive
+ * as de arquivos estáticos. Sem devolver false para os arquivos que
+ * existem, as imagens de perfil e de distintivo em
+ * public/image/... respondiam 404 no ambiente de desenvolvimento,
+ * mesmo estando no disco.
+ *
+ * Sob Apache o servidor entrega o arquivo antes de chegar ao PHP, então
+ * este bloco simplesmente não é alcançado.
+ */
+if (php_sapi_name() === 'cli-server') {
+    $caminhoRequisitado = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+    $arquivo = __DIR__ . '/' . ltrim(rawurldecode($caminhoRequisitado), '/');
+
+    /* realpath resolve ".." e garante que o alvo está dentro de public/. */
+    $arquivoReal = realpath($arquivo);
+    $raizPublica = realpath(__DIR__);
+
+    if (
+        $arquivoReal !== false
+        && $raizPublica !== false
+        && is_file($arquivoReal)
+        && str_starts_with($arquivoReal, $raizPublica . DIRECTORY_SEPARATOR)
+        && basename($arquivoReal) !== 'index.php'
+    ) {
+        return false;
+    }
+}
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 \App\Middleware\CorsMiddleware::aplicar();

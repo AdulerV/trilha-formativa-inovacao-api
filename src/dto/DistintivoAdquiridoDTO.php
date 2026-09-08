@@ -9,38 +9,52 @@ class DistintivoAdquiridoDTO
         ];
     }
 
+    /**
+     * O vínculo usuário/distintivo é gravado só pelos dois IDs; as
+     * entidades completas servem apenas para satisfazer o construtor
+     * de DistintivoAdquirido.
+     *
+     * Antes, criarUsuario() e criarDistintivo() eram declaradas DENTRO
+     * deste método. Função declarada dentro de função em PHP entra no
+     * escopo GLOBAL na primeira execução — na segunda chamada o
+     * processo morre com "Cannot redeclare criarUsuario()", e o mesmo
+     * nome era usado em AlternativaMarcadaDTO. Agora são métodos
+     * estáticos privados, sem esse efeito colateral.
+     *
+     * Também não se usa mais o construtor validante: ele obrigava a
+     * inventar nome, e-mail e senha, e cada senha inventada custava
+     * ~180 ms de bcrypt por chamada.
+     */
     public static function create(int $idUsuario, int $idDistintivo): DistintivoAdquirido
     {
-
-        function criarUsuario(int $idUsuario): Usuario
-        {
-            return new Usuario(
-                $idUsuario,
-                "João da Silva",
-                "Aventureiro",
-                "email@test.com",
-                "2000-01-01",
-                true,
-                true,
-                false,
-                "Senha@123",
-                new Ocupacao(1, "Dev")
-            );
-        }
-
-        function criarDistintivo(int $idDistintivo): Distintivo
-        {
-            return new Distintivo(
-                $idDistintivo,
-                "Bronze",
-                10,
-                "bronze.svg"
-            );
-        }
-
         return new DistintivoAdquirido(
-            criarUsuario($idUsuario),
-            criarDistintivo($idDistintivo)
+            self::referenciaDeUsuario($idUsuario),
+            self::referenciaDeDistintivo($idDistintivo)
+        );
+    }
+
+    private static function referenciaDeUsuario(int $idUsuario): Usuario
+    {
+        return Usuario::rehidratar(
+            $idUsuario,
+            "",
+            "",
+            "",
+            null,
+            null,
+            false,
+            false,
+            Ocupacao::rehidratar(null, "")
+        );
+    }
+
+    private static function referenciaDeDistintivo(int $idDistintivo): Distintivo
+    {
+        return new Distintivo(
+            $idDistintivo,
+            "Bronze",
+            10,
+            "bronze.svg"
         );
     }
 }

@@ -8,10 +8,30 @@ class DistintivoAdquiridoService
         $this->distintivoAdquiridoDAO = $distintivoAdquiridoDAO;
     }
 
-    public function salvar(DistintivoAdquirido $distintivoAdquirido): void
+    /**
+     * Registra a conquista do distintivo.
+     *
+     * Idempotente: conceder de novo um distintivo que o usuário já
+     * possui não é erro, é o mesmo estado final. A verificação de
+     * conquista roda a cada conclusão de tarefa com 100%, então esse
+     * caso acontece naturalmente — e recusá-lo com 400 fazia a tela de
+     * conclusão exibir falha em uma operação que não tinha nada de
+     * errado.
+     */
+    public function salvar(DistintivoAdquirido $distintivoAdquirido): bool
     {
         $this->validarCriacao($distintivoAdquirido);
+
+        $idUsuario = $distintivoAdquirido->getUsuario()->getIdUsuario();
+        $idDistintivo = $distintivoAdquirido->getDistintivo()->getIdDistintivo();
+
+        if ($this->distintivoAdquiridoDAO->verificarSeDistintivoAdquiridoExiste($idUsuario, $idDistintivo)) {
+            return false;
+        }
+
         $this->distintivoAdquiridoDAO->salvar($distintivoAdquirido);
+
+        return true;
     }
 
     public function buscarPorId(int $idUsuario, int $idDistintivo): DistintivoAdquirido
@@ -52,25 +72,27 @@ class DistintivoAdquiridoService
 
     private function validarCriacao(DistintivoAdquirido $distintivoAdquirido): void
     {
+        $idUsuario = $distintivoAdquirido->getUsuario()->getIdUsuario();
+        $idDistintivo = $distintivoAdquirido->getDistintivo()->getIdDistintivo();
+
+        /*
+         * A checagem era apenas contra null, então um id 0 (corpo sem
+         * a chave) passava e só falhava na chave estrangeira, virando
+         * 500. Agora vira 400 com mensagem de negócio.
+         */
         if (
-            $distintivoAdquirido->getUsuario()->getIdUsuario() === null ||
-            $distintivoAdquirido->getDistintivo()->getIdDistintivo() === null
+            $idUsuario === null || $idUsuario <= 0 ||
+            $idDistintivo === null || $idDistintivo <= 0
         ) {
             throw new RegraDeNegocioException(
                 "Distintivo adquirido deve possuir IDs válidos!"
             );
         }
 
-        if (
-            $this->distintivoAdquiridoDAO->verificarSeDistintivoAdquiridoExiste(
-                $distintivoAdquirido->getUsuario()->getIdUsuario(),
-                $distintivoAdquirido->getDistintivo()->getIdDistintivo()
-            )
-        ) {
-            throw new RegraDeNegocioException(
-                "Distintivo adquirido já cadastrado!"
-            );
-        }
+        /*
+         * A duplicidade é tratada em salvar(), devolvendo false em vez
+         * de lançar: repetir a concessão não é violação de regra.
+         */
     }
 
     private function validarAtualizacao(DistintivoAdquirido $distintivoAdquirido): void

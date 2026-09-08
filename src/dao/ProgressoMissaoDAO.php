@@ -188,13 +188,44 @@ class ProgressoMissaoDAO
     INNER JOIN tematica t ON m.IdTematica = t.IdTematica";
     }
 
+    /**
+     * Monta o progresso a partir da linha já trazida pelo JOIN.
+     *
+     * Antes, a variante "atividade" era delegada a um mapeador que
+     * disparava MissaoAtividadeDAO::buscarPorId() para CADA linha —
+     * e esse método carrega questões e alternativas da missão, dados
+     * que nenhuma tela consome no progresso. Era um N+1 completo em
+     * cima de uma consulta que já traz tudo o que o DTO precisa.
+     */
     private function processarRegistroProgresso(array $dados): ProgressoMissao
     {
-        if (!is_null($dados["TentativasRealizadas"]) && !is_null($dados["PontuacaoObtida"])) {
-            return $this->progressoAtividadeDAO->mapearProgressoMissaoAtividade($dados);
+        $usuario = $this->mapearUsuario($dados);
+
+        $tematica = new Tematica(
+            (int) $dados["IdTematica"],
+            $dados["TituloTematica"]
+        );
+
+        $missao = $this->mapearMissao($dados, $tematica);
+
+        $ehAtividade = !is_null($dados["TentativasRealizadas"])
+            && !is_null($dados["PontuacaoObtida"]);
+
+        if ($ehAtividade) {
+            return ProgressoMissaoAtividade::rehidratarAtividade(
+                $usuario,
+                $missao,
+                (int) $dados["Progresso"],
+                (int) $dados["TentativasRealizadas"],
+                (float) $dados["PontuacaoObtida"]
+            );
         }
 
-        return $this->mapearProgressoMissao($dados);
+        return ProgressoMissao::rehidratar(
+            $usuario,
+            $missao,
+            (int) $dados["Progresso"]
+        );
     }
 
     private function mapearMissao(array $dados, Tematica $tematica): Missao
@@ -248,14 +279,14 @@ class ProgressoMissaoDAO
         );
     }
 
-    private function mapearProgressoMissao(array $dados): ProgressoMissao
+    private function mapearUsuario(array $dados): Usuario
     {
         $ocupacao = new Ocupacao(
             (int) $dados["IdOcupacao"],
             $dados["TituloOcupacao"]
         );
 
-        $usuario = new Usuario(
+        return Usuario::rehidratar(
             (int) $dados["IdUsuario"],
             $dados["Nome"],
             $dados["NomeAventureiro"],
@@ -264,23 +295,8 @@ class ProgressoMissaoDAO
             (bool) $dados["PossuiConhecimento"],
             (bool) $dados["PrimeiroAcesso"],
             (bool) $dados["Admin"],
-            "Senha@123",
-            $ocupacao
-        );
-
-        $usuario->setFotoPerfil($dados["FotoPerfil"]);
-
-        $tematica = new Tematica(
-            (int) $dados["IdTematica"],
-            $dados["TituloTematica"]
-        );
-
-        $missao = $this->mapearMissao($dados, $tematica);
-
-        return new ProgressoMissao(
-            $usuario,
-            $missao,
-            (int) $dados["Progresso"]
+            $ocupacao,
+            $dados["FotoPerfil"] ?? null
         );
     }
 }

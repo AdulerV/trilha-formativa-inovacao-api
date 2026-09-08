@@ -39,7 +39,7 @@ class MissaoService
         return $missao;
     }
 
-    public function atualizar(Missao $missao): int
+    public function atualizar(Missao $missao): void
     {
         $this->validarAtualizacao($missao);
         $this->missaoDAO->atualizar($missao);
@@ -53,8 +53,6 @@ class MissaoService
                 }
             }
         }
-
-        return $questao->getIdQuestao();
     }
 
     public function deletar(int $idMissao): void

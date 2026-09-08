@@ -11,22 +11,38 @@ class AlternativaMarcadaDAO
         $this->conexao = $conexao;
     }
 
+    /**
+     * Grava a marcação, substituindo a anterior da mesma alternativa.
+     *
+     * A chave primária de ALTERNATIVA_MARCADA é (IdUsuario,
+     * IdAlternativa): ao responder o quiz de novo, o INSERT puro
+     * violava a chave e o serviço devolvia "Esta alternativa já foi
+     * marcada por este usuário!". O resultado era que apenas a
+     * primeira tentativa ficava salva.
+     *
+     * ON DUPLICATE KEY UPDATE resolve em uma única instrução, sem a
+     * janela de corrida de um "verifica e depois grava".
+     */
     public function salvar(AlternativaMarcada $alternativaMarcada): void
     {
         try {
             $sql = "INSERT INTO alternativa_marcada (
-                IdUsuario, 
-                IdAlternativa, 
-                Correta, 
-                SequenciaRespondida, 
+                IdUsuario,
+                IdAlternativa,
+                Correta,
+                SequenciaRespondida,
                 IdAlternativaAssociadaRespondida
             ) VALUES (
-                :idUsuario, 
-                :idAlternativa, 
-                :correta, 
-                :sequenciaRespondida, 
+                :idUsuario,
+                :idAlternativa,
+                :correta,
+                :sequenciaRespondida,
                 :idAlternativaAssociadaRespondida
-            )";
+            )
+            ON DUPLICATE KEY UPDATE
+                Correta = VALUES(Correta),
+                SequenciaRespondida = VALUES(SequenciaRespondida),
+                IdAlternativaAssociadaRespondida = VALUES(IdAlternativaAssociadaRespondida)";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idUsuario", $alternativaMarcada->getUsuario()->getIdUsuario());
@@ -208,7 +224,7 @@ class AlternativaMarcadaDAO
             $registro["TituloOcupacao"]
         );
 
-        $usuario = new Usuario(
+        $usuario = Usuario::rehidratar(
             (int) $registro["IdUsuario"],
             $registro["Nome"],
             $registro["NomeAventureiro"],
@@ -217,11 +233,9 @@ class AlternativaMarcadaDAO
             (bool) $registro["PossuiConhecimento"],
             (bool) $registro["PrimeiroAcesso"],
             (bool) $registro["Admin"],
-            "Senha@123",
-            $ocupacao
+            $ocupacao,
+            $registro["FotoPerfil"] ?? null
         );
-
-        $usuario->setFotoPerfil($registro["FotoPerfil"]);
 
         $tipoAlternativa = $registro["TipoAlternativa"];
         $idAlternativa = (int) $registro["IdAlternativa"];

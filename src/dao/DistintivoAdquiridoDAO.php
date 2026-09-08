@@ -231,7 +231,7 @@ class DistintivoAdquiridoDAO
             $registro["TituloOcupacao"]
         );
 
-        $usuario = new Usuario(
+        $usuario = Usuario::rehidratar(
             (int) $registro["IdUsuario"],
             $registro["Nome"],
             $registro["NomeAventureiro"],
@@ -240,11 +240,9 @@ class DistintivoAdquiridoDAO
             (bool) $registro["PossuiConhecimento"],
             (bool) $registro["PrimeiroAcesso"],
             (bool) $registro["Admin"],
-            "Senha@123",
-            $ocupacao
+            $ocupacao,
+            $registro["FotoPerfil"] ?? null
         );
-
-        $usuario->setFotoPerfil($registro["FotoPerfil"]);
 
         $distintivo = new Distintivo(
             (int) $registro["IdDistintivo"],

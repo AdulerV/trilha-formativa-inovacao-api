@@ -22,43 +22,61 @@ class AlternativaMarcadaDTO
 
         return $array;
     }
+    /**
+     * Constrói a marcação a partir dos IDs recebidos.
+     *
+     * criarUsuario() e criarAlternativa() eram declaradas DENTRO deste
+     * método. Em PHP, função declarada dentro de função vai para o
+     * escopo GLOBAL na primeira execução: a segunda chamada dentro da
+     * mesma requisição derruba o processo com "Cannot redeclare
+     * criarUsuario()" — e o mesmo nome existia em DistintivoAdquiridoDTO.
+     * Salvar mais de uma resposta em uma única requisição era fatal.
+     *
+     * As entidades aqui são apenas portadoras dos IDs: o gabarito real
+     * é lido do banco em AlternativaMarcadaService::salvar(). Por isso
+     * a rehidratação, que não gasta bcrypt em uma senha inventada.
+     */
     public static function create(int $idUsuario, int $idAlternativa, array $dadosExtras = []): AlternativaMarcada
     {
-        function criarUsuario(int $idUsuario): Usuario
-        {
-            return new Usuario(
-                $idUsuario,
-                "João da Silva",
-                "Aventureiro",
-                "email@test.com",
-                "2000-01-01",
-                true,
-                true,
-                false,
-                "Senha@123",
-                new Ocupacao(1, "Dev")
-            );
-        }
+        $sequencia = isset($dadosExtras['sequenciaRespondida'])
+            ? (int) $dadosExtras['sequenciaRespondida']
+            : null;
 
-        function criarAlternativa(int $idAlternativa): Alternativa
-        {
-            return new AlternativaMultiplaEscolha(
-                $idAlternativa,
-                "Texto mock da alternativa selecionada",
-                false,
-                "verdadeiro_falso"
-            );
-        }
-
-        $sequencia = isset($dadosExtras['sequenciaRespondida']) ? (int) $dadosExtras['sequenciaRespondida'] : null;
-        $associada = isset($dadosExtras['idAlternativaAssociadaRespondida']) ? (int) $dadosExtras['idAlternativaAssociadaRespondida'] : null;
+        $associada = isset($dadosExtras['idAlternativaAssociadaRespondida'])
+            ? (int) $dadosExtras['idAlternativaAssociadaRespondida']
+            : null;
 
         return new AlternativaMarcada(
-            criarUsuario($idUsuario),
-            criarAlternativa($idAlternativa),
+            self::referenciaDeUsuario($idUsuario),
+            self::referenciaDeAlternativa($idAlternativa),
             false,
             $sequencia,
             $associada
+        );
+    }
+
+    private static function referenciaDeUsuario(int $idUsuario): Usuario
+    {
+        return Usuario::rehidratar(
+            $idUsuario,
+            "",
+            "",
+            "",
+            null,
+            null,
+            false,
+            false,
+            Ocupacao::rehidratar(null, "")
+        );
+    }
+
+    private static function referenciaDeAlternativa(int $idAlternativa): Alternativa
+    {
+        return new AlternativaMultiplaEscolha(
+            $idAlternativa,
+            "Alternativa referenciada pela marcação",
+            false,
+            "verdadeiro_falso"
         );
     }
 }

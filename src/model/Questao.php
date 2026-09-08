@@ -77,13 +77,18 @@ class Questao
         return $this->alternativas;
     }
 
+    /**
+     * Devolve a alternativa criada para que o chamador possa informar
+     * o ID gerado na resposta da API — sem isso o frontend precisava
+     * relistar tudo para descobrir o que acabou de salvar.
+     */
     public function adicionarAlternativa(
         string $texto,
         string $tipoAlternativa,
         ?int $id = null,
         array $dadosAdicionais = []
-    ): void {
-        $this->alternativas[] = match ($tipoAlternativa) {
+    ): Alternativa {
+        $this->alternativas[] = $alternativa = match ($tipoAlternativa) {
             Alternativa::TIPO_ORDENACAO => new AlternativaOrdenacao(
                 $id,
                 $texto,
@@ -104,8 +109,27 @@ class Questao
                     );
 
                 if (is_array($associada)) {
+                    /*
+                     * A leitura devolve a associada com a chave "id"
+                     * (AlternativaDTO::toArray) e a escrita esperava
+                     * "idAlternativaAssociada". Quem reenviava para
+                     * edição o objeto recebido da API perdia o ID no
+                     * caminho, e a associação era recriada em vez de
+                     * atualizada. Aceitar as duas grafias resolve a
+                     * assimetria sem mudar o contrato de resposta.
+                     */
+                    $idAssociada = $associada['idAlternativaAssociada']
+                        ?? $associada['id']
+                        ?? null;
+
+                    if (!isset($associada['texto'])) {
+                        throw new DomainException(
+                            "A alternativa associada precisa conter um texto."
+                        );
+                    }
+
                     $associada = new class(
-                        $associada['idAlternativaAssociada'] ?? null,
+                        $idAssociada !== null ? (int) $idAssociada : null,
                         $associada['texto'],
                         Alternativa::TIPO_ASSOCIACAO
                     ) extends Alternativa {};
@@ -127,6 +151,8 @@ class Questao
 
             default => throw new DomainException("Tipo de alternativa desconhecido: {$tipoAlternativa}")
         };
+
+        return $alternativa;
     }
 
     public function removerAlternativa(int $indice): void

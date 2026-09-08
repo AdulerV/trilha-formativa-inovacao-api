@@ -26,7 +26,11 @@ class QuestaoDTO
         return $array;
     }
 
-    public static function create(array $dados, ?int $id, MissaoAtividade $missao): void
+    /**
+     * Devolve a questão montada para que o controller possa responder
+     * com o ID gerado depois de persistir.
+     */
+    public static function create(array $dados, ?int $id, MissaoAtividade $missao): Questao
     {
         $questao = $missao->adicionarQuestao(
             $dados["enunciado"],
@@ -40,6 +44,16 @@ class QuestaoDTO
 
                 if (isset($altDados["numeroSequencia"])) {
                     $dadosAdicionais["numeroSequencia"] = (int) $altDados["numeroSequencia"];
+                }
+
+                /*
+                 * "correta" não era repassado aqui, só em
+                 * AlternativaDTO::create. Salvar a questão com as
+                 * alternativas de múltipla escolha em uma requisição
+                 * só falhava sempre com "Faltando o campo 'correta'".
+                 */
+                if (isset($altDados["correta"])) {
+                    $dadosAdicionais["correta"] = (bool) $altDados["correta"];
                 }
 
                 if (isset($altDados["subtipo"])) {
@@ -58,5 +72,7 @@ class QuestaoDTO
                 );
             }
         }
+
+        return $questao;
     }
 }

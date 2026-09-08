@@ -410,6 +410,21 @@ O envio usa **PHPMailer** sobre SMTP, encapsulado na classe `EmailService`. Todo
 
 Se o SMTP falhar, o erro vai para o log do PHP e o token é invalidado. A resposta HTTP continua sendo a mensagem genérica — qualquer variação reintroduziria a enumeração de contas.
 
+### Papel do frontend
+
+A API não renderiza nenhuma tela: ela expõe os três endpoints e deixa toda a experiência do usuário por conta do frontend.
+
+O link enviado por e-mail aponta para `APP_FRONTEND_URL/redefinir-senha?token=...`. Isso significa que o frontend precisa ter uma rota `/redefinir-senha` que:
+
+1. Lê o `token` da query string da URL.
+2. Opcionalmente, chama `GET /api/v1/recuperacao-senha/validar?token=...` assim que a página carrega, para mostrar "link expirado" sem obrigar o usuário a preencher o formulário à toa.
+3. Mostra um formulário com dois campos: nova senha e confirmação.
+4. Ao enviar, chama `POST /api/v1/recuperacao-senha/redefinir` passando o `token` (o mesmo lido no passo 1, não algo digitado pelo usuário) junto com `novaSenha` e `novaSenhaRepeticao`.
+5. Em caso de sucesso, redireciona para a tela de login. A API nunca autentica automaticamente depois da redefinição — por desenho — então o usuário precisa logar de novo com a senha nova.
+6. Em caso de erro (token inválido/expirado, senhas não conferem, senha fora da política), exibe a mensagem que a API devolveu no campo `erro` ou `mensagem`.
+
+Enquanto essa tela não existir, o fluxo pode ser validado diretamente via Postman/curl: o token copiado do e-mail (recebido, durante o desenvolvimento, na inbox do provedor de teste configurado no `.env`) é exatamente o que a tela leria da URL.
+
 ### Migração do banco
 
 A tabela `RECUPERACAO_SENHA` já consta do `database.sql`. Em uma base existente, aplique apenas a migração:

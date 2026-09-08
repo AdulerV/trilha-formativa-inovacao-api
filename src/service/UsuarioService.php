@@ -42,6 +42,32 @@ class UsuarioService
         $this->usuarioDAO->salvar($usuario);
     }
 
+    /**
+     * Remove a foto de perfil do usuário.
+     *
+     * Apaga o arquivo do disco antes de limpar a referência: se a
+     * ordem fosse invertida e a limpeza falhasse, o banco apontaria
+     * para um arquivo que não existe mais.
+     */
+    public function removerFotoPerfil(int $idUsuario, UploadService $uploadService): void
+    {
+        $usuario = $this->buscarPorId($idUsuario);
+
+        $caminhoAtual = $usuario->getFotoPerfil();
+
+        if ($caminhoAtual === null || trim($caminhoAtual) === "") {
+            throw new RegraDeNegocioException("Este usuário não possui imagem de perfil.");
+        }
+
+        $uploadService->removerImagemPerfil(
+            $idUsuario,
+            $usuario->getNomeAventureiro(),
+            $caminhoAtual
+        );
+
+        $this->usuarioDAO->atualizarFotoPerfil($idUsuario, "");
+    }
+
 
     public function buscarPorId(int $idUsuario): Usuario
     {
@@ -74,15 +100,24 @@ class UsuarioService
         $this->usuarioDAO->deletar($idUsuario);
     }
 
-    public function verificarSenhaRepeticao(string $senha, string $senhaRepeticao)
+    /**
+     * Parâmetros nulos porque o corpo da requisição pode não trazer as
+     * chaves. Declarados como `string`, a ausência virava TypeError e
+     * a requisição respondia 500 sem corpo.
+     */
+    public function verificarSenhaRepeticao(?string $senha, ?string $senhaRepeticao): void
     {
-        if (trim($senha) !== trim($senhaRepeticao)) {
+        if (trim((string) $senha) !== trim((string) $senhaRepeticao)) {
             throw new RegraDeNegocioException("Senhas não conferem!");
         }
     }
 
-    public function verificarSenhaAtual(int $idUsuario, string $senhaAtual)
+    public function verificarSenhaAtual(int $idUsuario, ?string $senhaAtual): void
     {
+        if ($senhaAtual === null || trim($senhaAtual) === "") {
+            throw new RegraDeNegocioException("Informe a senha atual para continuar!");
+        }
+
         if (!$this->usuarioDAO->verificarSenhaAtual($idUsuario, $senhaAtual)) {
             throw new RegraDeNegocioException("Senha atual não confere!");
         }
