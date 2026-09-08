@@ -18,19 +18,37 @@ class AlternativaController
 
             $questao = $this->questaoService->buscarSomentePorId($idQuestao);
 
-            
-            AlternativaDTO::create($dados, null, $questao);
+            $criadas = AlternativaDTO::create($dados, null, $questao);
 
             $this->questaoService->atualizar($questao);
 
+            /* Mesmo motivo da questão: o frontend precisa dos IDs gerados. */
             Response::json([
-                "mensagem" => "Alternativa salva com sucesso!"
-            ]);
+                "mensagem" => "Alternativa salva com sucesso!",
+                "alternativas" => array_map(
+                    fn(Alternativa $alternativa) => AlternativaDTO::toArray($alternativa),
+                    $criadas
+                )
+            ], 201);
         } catch (DomainException $e) {
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Alternativa] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -45,7 +63,21 @@ class AlternativaController
             }, $lista);
 
             Response::json($resultado);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Alternativa] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -64,7 +96,21 @@ class AlternativaController
             Response::json($resultado);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Alternativa] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -81,7 +127,21 @@ class AlternativaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 404);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Alternativa] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -104,7 +164,21 @@ class AlternativaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Alternativa] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -121,7 +195,21 @@ class AlternativaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Alternativa] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }

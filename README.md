@@ -16,6 +16,7 @@ Este projeto foi desenvolvido utilizando:
 * **Composer**
 * **MySQL**
 * **JWT (JSON Web Token)**
+* **PHPMailer (SMTP)**
 * **API RESTful**
 * **PDO**
 
@@ -105,9 +106,27 @@ Entre as configurações utilizadas pela aplicação estão:
 Exemplo de estrutura:
 
 ```env
+APP_NAME="Trilha Formativa de Inovação"
+APP_FRONTEND_URL=http://localhost:5173
+
 JWT_SECRET=sua_chave_secreta
 JWT_EXPIRATION=28800
+
+PASSWORD_RESET_TTL_MINUTES=30
+PASSWORD_RESET_MAX_REQUESTS=3
+PASSWORD_RESET_WINDOW_MINUTES=15
+
+MAIL_HOST=smtp.seu-provedor.com
+MAIL_PORT=587
+MAIL_USERNAME=usuario@seu-dominio.com
+MAIL_PASSWORD=sua_senha_de_aplicativo
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=nao-responda@seu-dominio.com
+MAIL_FROM_NAME="Trilha Formativa de Inovação"
+MAIL_SMTP_DEBUG=0
 ```
+
+O arquivo `.env.example`, disponível na raiz do projeto, traz a lista completa e comentada dessas variáveis.
 
 Os valores devem ser configurados de acordo com o ambiente em que a API será executada.
 
@@ -292,6 +311,130 @@ JWT_EXPIRATION=28800
 
 ---
 
+## Recuperação de senha
+
+A API disponibiliza um mecanismo de redefinição de senha para o usuário que perdeu o acesso à própria conta. O fluxo segue as recomendações do **OWASP Forgot Password Cheat Sheet**.
+
+### Como funciona
+
+1. O usuário informa o e-mail cadastrado.
+2. A API gera um token aleatório de **256 bits** (64 caracteres hexadecimais).
+3. Apenas o resumo **SHA-256** do token é gravado na tabela `RECUPERACAO_SENHA`. O token em claro existe somente no e-mail enviado.
+4. O usuário recebe um link para o frontend contendo o token.
+5. Ao redefinir, a API confere o token, aplica a política de senha, grava o novo hash e **invalida o token**.
+6. Um e-mail de confirmação avisa que a senha foi alterada.
+
+### Endpoints
+
+| Método | Rota | Autenticação | Descrição |
+| --- | --- | --- | --- |
+| `POST` | `/api/v1/recuperacao-senha/solicitar` | Pública | Solicita o envio do link de redefinição |
+| `GET` | `/api/v1/recuperacao-senha/validar?token=...` | Pública | Verifica se o token ainda é válido, sem consumi-lo |
+| `POST` | `/api/v1/recuperacao-senha/redefinir` | Pública | Grava a nova senha e consome o token |
+
+**Solicitar**
+
+```http
+POST /api/v1/recuperacao-senha/solicitar
+Content-Type: application/json
+
+{
+  "correioEletronico": "aventureiro@exemplo.com"
+}
+```
+
+```json
+{
+  "mensagem": "Se o e-mail informado estiver cadastrado, enviaremos as instruções de redefinição de senha."
+}
+```
+
+A resposta é sempre `200` com essa mesma mensagem, exista ou não a conta.
+
+**Validar**
+
+```http
+GET /api/v1/recuperacao-senha/validar?token=1f4c...9ab2
+```
+
+```json
+{
+  "valido": true,
+  "expiraEm": "2026-09-06T15:42:00-03:00"
+}
+```
+
+Token ausente, expirado ou já utilizado retorna `400` com `"valido": false`.
+
+**Redefinir**
+
+```http
+POST /api/v1/recuperacao-senha/redefinir
+Content-Type: application/json
+
+{
+  "token": "1f4c...9ab2",
+  "novaSenha": "NovaSenha@2026",
+  "novaSenhaRepeticao": "NovaSenha@2026"
+}
+```
+
+```json
+{
+  "mensagem": "Senha redefinida com sucesso! Faça login com a nova senha."
+}
+```
+
+A nova senha passa pela mesma política do cadastro: mínimo de 8 caracteres, com letra, número e caractere especial.
+
+### Decisões de segurança
+
+| Controle | Implementação |
+| --- | --- |
+| Entropia do token | `random_bytes(32)` — gerador criptograficamente seguro |
+| Armazenamento | Somente o resumo SHA-256, nunca o token |
+| Uso único | `UPDATE ... WHERE DataUtilizacao IS NULL`, consumo atômico mesmo sob concorrência |
+| Validade | `PASSWORD_RESET_TTL_MINUTES`, 30 minutos por padrão |
+| Enumeração de contas | Mensagem única e piso de tempo de resposta de 400 ms, independentemente do desfecho |
+| Rate limiting | Máximo de solicitações por conta dentro de uma janela configurável |
+| Tokens anteriores | Invalidados a cada nova solicitação e após a redefinição |
+| Login automático | Não ocorre: o usuário precisa autenticar-se com a senha nova |
+| Host Header Injection | O link vem de `APP_FRONTEND_URL`, jamais do cabeçalho `Host` |
+| Confirmação | E-mail de aviso após a alteração, sem conter a senha |
+
+> **Limitação conhecida:** por serem *stateless*, os JWT emitidos antes da redefinição continuam válidos até expirarem. Invalidá-los exigiria versionar a senha no token e consultar o banco a cada requisição, o que altera o desenho atual do `JwtMiddleware`.
+
+### Envio de e-mail
+
+O envio usa **PHPMailer** sobre SMTP, encapsulado na classe `EmailService`. Todos os parâmetros vêm do `.env`, então trocar de provedor não exige alteração de código.
+
+Se o SMTP falhar, o erro vai para o log do PHP e o token é invalidado. A resposta HTTP continua sendo a mensagem genérica — qualquer variação reintroduziria a enumeração de contas.
+
+### Papel do frontend
+
+A API não renderiza nenhuma tela: ela expõe os três endpoints e deixa toda a experiência do usuário por conta do frontend.
+
+O link enviado por e-mail aponta para `APP_FRONTEND_URL/redefinir-senha?token=...`. Isso significa que o frontend precisa ter uma rota `/redefinir-senha` que:
+
+1. Lê o `token` da query string da URL.
+2. Opcionalmente, chama `GET /api/v1/recuperacao-senha/validar?token=...` assim que a página carrega, para mostrar "link expirado" sem obrigar o usuário a preencher o formulário à toa.
+3. Mostra um formulário com dois campos: nova senha e confirmação.
+4. Ao enviar, chama `POST /api/v1/recuperacao-senha/redefinir` passando o `token` (o mesmo lido no passo 1, não algo digitado pelo usuário) junto com `novaSenha` e `novaSenhaRepeticao`.
+5. Em caso de sucesso, redireciona para a tela de login. A API nunca autentica automaticamente depois da redefinição — por desenho — então o usuário precisa logar de novo com a senha nova.
+6. Em caso de erro (token inválido/expirado, senhas não conferem, senha fora da política), exibe a mensagem que a API devolveu no campo `erro` ou `mensagem`.
+
+Enquanto essa tela não existir, o fluxo pode ser validado diretamente via Postman/curl: o token copiado do e-mail (recebido, durante o desenvolvimento, na inbox do provedor de teste configurado no `.env`) é exatamente o que a tela leria da URL.
+
+### Migração do banco
+
+A tabela `RECUPERACAO_SENHA` já consta do `database.sql`. Em uma base existente, aplique apenas a migração:
+
+```bash
+mysql -u root -p mydb < src/config/sql/migrations/001_recuperacao_senha.sql
+```
+
+---
+
 ## Estrutura do projeto
 
 A API está organizada em diferentes camadas, buscando separar as responsabilidades relacionadas à configuração, comunicação HTTP, regras de negócio, persistência de dados, segurança e tratamento de exceções.
@@ -350,7 +493,19 @@ As configurações do framework de testes estão definidas no arquivo:
 phpunit.xml
 ```
 
-Os testes podem ser executados através do Composer/PHPUnit conforme a configuração disponibilizada no projeto.
+Os testes podem ser executados através do Composer/PHPUnit conforme a configuração disponibilizada no projeto:
+
+```bash
+composer test
+```
+
+ou
+
+```bash
+vendor/bin/phpunit
+```
+
+A suíte `tests/RecuperacaoSenhaServiceTest.php` cobre o mecanismo de recuperação de senha: emissão do token, anti-enumeração de contas, rate limiting, token expirado, token já utilizado, consumo concorrente e aderência à política de senha.
 
 ---
 

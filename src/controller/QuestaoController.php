@@ -18,18 +18,41 @@ class QuestaoController
 
             $missao = $this->missaoService->buscarPorId($idMissao);
 
-            QuestaoDTO::create($dados, null, $missao);
+            $questao = QuestaoDTO::create($dados, null, $missao);
 
             $this->missaoService->atualizar($missao);
 
+            /*
+             * O ID da questão criada é devolvido na resposta. Sem ele,
+             * o frontend tinha que listar TODAS as questões e procurar
+             * a recém-criada por enunciado — caro e ambíguo, porque
+             * dois enunciados iguais em missões diferentes casavam com
+             * o mesmo filtro.
+             */
             Response::json([
-                "mensagem" => "Questão salva com sucesso!"
-            ]);
+                "mensagem" => "Questão salva com sucesso!",
+                "id" => $questao->getIdQuestao(),
+                "questao" => QuestaoDTO::toArray($questao)
+            ], 201);
         } catch (DomainException $e) {
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Questao] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -44,7 +67,21 @@ class QuestaoController
             }, $lista);
 
             Response::json($resultado);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Questao] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -63,7 +100,21 @@ class QuestaoController
             Response::json($resultado);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Questao] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -80,7 +131,21 @@ class QuestaoController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 404);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Questao] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -103,7 +168,21 @@ class QuestaoController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Questao] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -120,7 +199,21 @@ class QuestaoController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Questao] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }

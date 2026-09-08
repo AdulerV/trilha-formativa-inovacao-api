@@ -18,6 +18,7 @@ $adminAuth = [
  */
 
 $router->add("POST", "/api/v1/usuarios/{idUsuario}/foto", [$usuarioController, "atualizarFotoPerfil"]);
+$router->add("DELETE", "/api/v1/usuarios/{idUsuario}/foto", [$usuarioController, "removerFotoPerfil"]);
 $router->add("POST", "/api/v1/login", [$usuarioController, "login"]);
 $router->add("POST", "/api/v1/usuarios", [$usuarioController, "salvar"]);
 $router->add("GET", "/api/v1/usuarios", [$usuarioController, "listar"]);

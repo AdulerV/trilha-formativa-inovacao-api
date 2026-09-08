@@ -33,11 +33,19 @@ class AlternativaDTO
         return $array;
     }
 
-    public static function create(array $dados, ?int $id, Questao $questao): void
+    /**
+     * Devolve as alternativas criadas, na ordem recebida, para que o
+     * controller possa responder com os IDs gerados.
+     *
+     * @return Alternativa[]
+     */
+    public static function create(array $dados, ?int $id, Questao $questao): array
     {
         if (isset($dados["texto"])) {
             $dados = [$dados];
         }
+
+        $criadas = [];
 
         foreach ($dados as $altDados) {
             $dadosAdicionais = [];
@@ -58,12 +66,14 @@ class AlternativaDTO
                 $dadosAdicionais["alternativaAssociada"] = $altDados["alternativaAssociada"];
             }
 
-            $questao->adicionarAlternativa(
+            $criadas[] = $questao->adicionarAlternativa(
                 $altDados["texto"],
                 $altDados["tipoAlternativa"],
                 isset($altDados["id"]) ? (int) $altDados["id"] : $id,
                 $dadosAdicionais
             );
         }
+
+        return $criadas;
     }
 }

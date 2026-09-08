@@ -44,7 +44,21 @@ class UsuarioController
             ]);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 401);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Usuario] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -68,7 +82,56 @@ class UsuarioController
             ]);
         } catch (DomainException $e) {
             Response::error($e->getMessage(), 401);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Usuario] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
+            Response::error("Erro interno", 500);
+        }
+    }
+
+    /**
+     * DELETE /api/v1/usuarios/{idUsuario}/foto
+     *
+     * Remove a imagem de perfil: apaga o arquivo do disco e limpa a
+     * referência no banco, para não sobrar no registro um caminho
+     * apontando para arquivo inexistente.
+     */
+    public function removerFotoPerfil(int $idUsuario): void
+    {
+        try {
+            $uploadService = new UploadService(__DIR__ . '/../../public/image/upload/perfil/');
+
+            $this->service->removerFotoPerfil($idUsuario, $uploadService);
+
+            Response::json([
+                "mensagem" => "Imagem de perfil removida com sucesso!",
+                "fotoPerfil" => null
+            ]);
+        } catch (DomainException $e) {
+            Response::error($e->getMessage(), 400);
+        } catch (RegraDeNegocioException $e) {
+            Response::error($e->getMessage(), 400);
+        } catch (Throwable $e) {
+            error_log(sprintf(
+                "[Usuario] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -76,9 +139,17 @@ class UsuarioController
     public function salvar(): void
     {
         try {
-            $dados = json_decode(file_get_contents("php://input"), true);
+            $dados = json_decode(file_get_contents("php://input"), true) ?? [];
 
-            $this->service->verificarSenhaRepeticao($dados["senha"], $dados["senhaRepeticao"]);
+            /* No cadastro a senha é obrigatória. */
+            if (!isset($dados["senha"]) || trim((string) $dados["senha"]) === "") {
+                throw new RegraDeNegocioException("Informe uma senha para o cadastro!");
+            }
+
+            $this->service->verificarSenhaRepeticao(
+                $dados["senha"],
+                $dados["senhaRepeticao"] ?? null
+            );
 
             $this->service->salvar(UsuarioDTO::create($dados, null));
 
@@ -89,7 +160,21 @@ class UsuarioController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Usuario] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -104,7 +189,21 @@ class UsuarioController
             }, $lista);
 
             Response::json($resultado);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Usuario] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -119,7 +218,21 @@ class UsuarioController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 404);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Usuario] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -127,11 +240,29 @@ class UsuarioController
     public function atualizar(int $id): void
     {
         try {
-            $dados = json_decode(file_get_contents("php://input"), true);
+            $dados = json_decode(file_get_contents("php://input"), true) ?? [];
 
-            $this->service->verificarSenhaRepeticao($dados["novaSenha"], $dados["novaSenhaRepeticao"]);
+            /*
+             * A senha atual continua obrigatória para confirmar a
+             * edição — regra já existente do sistema.
+             */
+            $this->service->verificarSenhaAtual($id, $dados["senhaAtual"] ?? null);
 
-            $this->service->verificarSenhaAtual($id, $dados["senhaAtual"]);
+            /*
+             * A nova senha é OPCIONAL. A repetição só é conferida
+             * quando o usuário realmente informou uma nova senha;
+             * antes a conferência era incondicional e, sem as chaves
+             * no corpo, quebrava com TypeError (500).
+             */
+            $novaSenha = $dados["novaSenha"] ?? null;
+            $desejaAlterarSenha = is_string($novaSenha) && trim($novaSenha) !== "";
+
+            if ($desejaAlterarSenha) {
+                $this->service->verificarSenhaRepeticao(
+                    $novaSenha,
+                    $dados["novaSenhaRepeticao"] ?? null
+                );
+            }
 
             $this->service->atualizar(UsuarioDTO::create($dados, $id));
 
@@ -142,7 +273,21 @@ class UsuarioController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Usuario] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -159,7 +304,21 @@ class UsuarioController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Usuario] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }

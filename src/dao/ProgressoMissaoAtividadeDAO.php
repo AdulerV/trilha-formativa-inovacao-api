@@ -2,15 +2,24 @@
 
 declare(strict_types=1);
 
+/**
+ * Escrita da especialização de progresso do tipo atividade.
+ *
+ * A leitura fica em ProgressoMissaoDAO, que já recebe TentativasRealizadas
+ * e PontuacaoObtida no mesmo JOIN — não há motivo para consultar a missão
+ * novamente linha a linha.
+ */
 class ProgressoMissaoAtividadeDAO
 {
     private PDO $conexao;
-    private MissaoAtividadeDAO $atividadeDAO;
 
-    public function __construct(PDO $conexao, MissaoAtividadeDAO $atividadeDAO)
+    /**
+     * $atividadeDAO permanece na assinatura para não quebrar a
+     * montagem das rotas; a leitura não depende mais dele.
+     */
+    public function __construct(PDO $conexao, ?MissaoAtividadeDAO $atividadeDAO = null)
     {
         $this->conexao = $conexao;
-        $this->atividadeDAO = $atividadeDAO;
     }
 
     public function salvar(ProgressoMissaoAtividade $progresso): void
@@ -50,38 +59,4 @@ class ProgressoMissaoAtividadeDAO
         }
     }
 
-    public function mapearProgressoMissaoAtividade(array $dados): ProgressoMissaoAtividade
-    {
-        $ocupacao = new Ocupacao(
-            (int) $dados["IdOcupacao"],
-            $dados["TituloOcupacao"]
-        );
-
-        $usuario = new Usuario(
-            (int) $dados["IdUsuario"],
-            $dados["Nome"],
-            $dados["NomeAventureiro"],
-            $dados["CorreioEletronico"],
-            $dados["DataNascimento"],
-            (bool) $dados["PossuiConhecimento"],
-            (bool) $dados["PrimeiroAcesso"],
-            (bool) $dados["Admin"],
-            "Senha@123",
-            $ocupacao
-        );
-
-        $missao = $this->atividadeDAO->buscarPorId(
-            (int) $dados["IdMissao"]
-        );
-
-        $progresso = new ProgressoMissaoAtividade(
-            $usuario,
-            $missao,
-            (int) $dados["Progresso"],
-            (int) $dados["TentativasRealizadas"],
-            (float) $dados["PontuacaoObtida"]
-        );
-
-        return $progresso;
-    }
 }

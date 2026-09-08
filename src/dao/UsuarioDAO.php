@@ -144,17 +144,29 @@ class UsuarioDAO
         }
     }
 
+    /**
+     * Atualiza os dados do usuário.
+     *
+     * A coluna HashSenha só entra no UPDATE quando a entidade carrega
+     * uma senha nova. Antes ela era sempre sobrescrita, o que obrigava
+     * o frontend a reenviar alguma senha em toda edição — e a solução
+     * que ele adotara era mandar a senha ATUAL em claro no campo de
+     * nova senha, gerando um hash novo para a mesma senha.
+     */
     public function atualizar(Usuario $usuario)
     {
         try {
-            $sql = "UPDATE usuario SET 
+            $alterarSenha = $usuario->temSenhaDefinida();
+
+            $sql = "UPDATE usuario SET
                 Nome = :nome,
                 NomeAventureiro = :nomeAventureiro,
                 CorreioEletronico = :correioEletronico,
                 DataNascimento = :dataNascimento,
                 PossuiConhecimento = :possuiConhecimento,
-                PrimeiroAcesso = :primeiroAcesso,
-                HashSenha = :hashSenha,
+                PrimeiroAcesso = :primeiroAcesso,"
+                . ($alterarSenha ? "\n                HashSenha = :hashSenha," : "")
+                . "
                 IdOcupacao = :idOcupacao
                 WHERE IdUsuario = :idUsuario";
 
@@ -164,18 +176,37 @@ class UsuarioDAO
             $stmt->bindValue(":nomeAventureiro", $usuario->getNomeAventureiro());
             $stmt->bindValue(":correioEletronico", $usuario->getCorreioEletronico());
             $stmt->bindValue(":dataNascimento", $usuario->getDataNascimento()?->format("Y-m-d"));
+            /*
+             * O tipo era fixo em PDO::PARAM_NULL, o que faz o PDO
+             * gravar NULL qualquer que seja o valor. Como a coluna é
+             * NOT NULL, TODA atualização de usuário falhava com
+             * "Column 'PossuiConhecimento' cannot be null" e o
+             * controller devolvia apenas "Erro interno".
+             */
+            $possuiConhecimento = $usuario->isPossuiConhecimento();
+
             $stmt->bindValue(
                 ":possuiConhecimento",
-                $usuario->isPossuiConhecimento() !== null
-                    ? (int) $usuario->isPossuiConhecimento()
-                    : null,
-                PDO::PARAM_NULL
+                $possuiConhecimento === null ? null : (int) $possuiConhecimento,
+                $possuiConhecimento === null ? PDO::PARAM_NULL : PDO::PARAM_INT
             );
-            $stmt->bindValue(":primeiroAcesso", (int) $usuario->isPrimeiroAcesso());
-            $stmt->bindValue(":hashSenha", $usuario->getSenha());
+
+            $stmt->bindValue(":primeiroAcesso", (int) $usuario->isPrimeiroAcesso(), PDO::PARAM_INT);
+
+            if ($alterarSenha) {
+                $stmt->bindValue(":hashSenha", $usuario->getSenha());
+            }
+
             $stmt->bindValue(":idOcupacao", $usuario->getOcupacao()?->getIdOcupacao());
             $stmt->execute();
-        } catch (PDOException) {
+        } catch (PDOException $e) {
+            /* A mensagem do banco vai para o log, não para o usuário. */
+            error_log(sprintf(
+                "[UsuarioDAO::atualizar] usuario %s: %s",
+                $usuario->getIdUsuario(),
+                $e->getMessage()
+            ));
+
             throw new Exception("Erro ao atualizar o usuário com ID igual a {$usuario->getIdUsuario()}");
         }
     }
@@ -192,6 +223,28 @@ class UsuarioDAO
             $stmt->execute();
         } catch (PDOException $e) {
             throw new Exception("Erro ao atualizar a foto de perfil do usuário de ID {$idUsuario}.");
+        }
+    }
+
+    /**
+     * Atualiza somente o hash da senha.
+     *
+     * Existe separado de atualizar() de propósito: a redefinição de
+     * senha não deve tocar em nome, e-mail, ocupação ou qualquer outro
+     * campo do cadastro.
+     */
+    public function atualizarHashSenha(int $idUsuario, string $hashSenha): void
+    {
+        try {
+            $sql = "UPDATE usuario SET HashSenha = :hashSenha WHERE IdUsuario = :idUsuario";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":hashSenha", $hashSenha);
+            $stmt->bindValue(":idUsuario", $idUsuario);
+
+            $stmt->execute();
+        } catch (PDOException) {
+            throw new Exception("Erro ao atualizar a senha do usuário de ID igual a {$idUsuario}");
         }
     }
 
@@ -284,7 +337,7 @@ class UsuarioDAO
             $registro["Titulo"]
         );
 
-        $usuario = new Usuario(
+        return Usuario::rehidratar(
             (int) $registro["IdUsuario"],
             $registro["Nome"],
             $registro["NomeAventureiro"],
@@ -293,16 +346,9 @@ class UsuarioDAO
             (bool) $registro["PossuiConhecimento"],
             (bool) $registro["PrimeiroAcesso"],
             (bool) $registro["Admin"],
-            "Senha@123",
-            $ocupacao
+            $ocupacao,
+            $registro["FotoPerfil"] ?? null,
+            $registro["HashSenha"] ?? null
         );
-
-        $usuario->setFotoPerfil($registro["FotoPerfil"]);
-
-        if ($registro["HashSenha"] !== null) {
-            $usuario->setHashSenha($registro["HashSenha"]);
-        }
-
-        return $usuario;
     }
 }

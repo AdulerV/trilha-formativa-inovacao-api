@@ -119,6 +119,18 @@ class AlternativaMarcadaService
         $this->alternativaMarcadaDAO->deletar($idUsuario, $idAlternativa);
     }
 
+    /**
+     * A marcação é idempotente por (usuário, alternativa).
+     *
+     * A regra anterior recusava a segunda marcação da mesma
+     * alternativa. Como o sistema permite refazer quiz e tarefa, essa
+     * recusa impedia justamente a nova tentativa de ser salva: a
+     * marcação repetida é o comportamento esperado, e o DAO substitui
+     * a resposta anterior.
+     *
+     * As regras de tentativas e pontuação continuam onde sempre
+     * estiveram, na conclusão da missão.
+     */
     private function validarCriacao(AlternativaMarcada $alternativaMarcada): void
     {
         if (
@@ -127,17 +139,6 @@ class AlternativaMarcadaService
         ) {
             throw new RegraDeNegocioException(
                 "Alternativa marcada deve possuir IDs de usuário e alternativa válidos!"
-            );
-        }
-
-        if (
-            $this->alternativaMarcadaDAO->verificarSeAlternativaMarcadaExiste(
-                $alternativaMarcada->getUsuario()->getIdUsuario(),
-                $alternativaMarcada->getAlternativa()->getIdAlternativa()
-            )
-        ) {
-            throw new RegraDeNegocioException(
-                "Esta alternativa já foi marcada por este usuário!"
             );
         }
     }

@@ -28,6 +28,14 @@ class AlternativaDAO
 
             $idAlternativa = $this->inserirAlternativaBase($alternativa);
 
+            /*
+             * O ID gerado precisa voltar para a entidade: a associada
+             * já recebia o dela em salvarEspecializacao(), mas a
+             * alternativa principal continuava com ID nulo e a API
+             * respondia "id": null para algo que acabara de ser criado.
+             */
+            $alternativa->setIdAlternativa($idAlternativa);
+
             $this->salvarEspecializacao($idAlternativa, $alternativa);
 
             $this->conexao->commit();

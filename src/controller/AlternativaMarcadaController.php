@@ -31,7 +31,21 @@ class AlternativaMarcadaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[AlternativaMarcada] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -46,7 +60,21 @@ class AlternativaMarcadaController
             }, $lista);
 
             Response::json($resultado);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[AlternativaMarcada] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -61,7 +89,21 @@ class AlternativaMarcadaController
             }, $lista);
 
             Response::json($resultado);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[AlternativaMarcada] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -76,7 +118,21 @@ class AlternativaMarcadaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 404);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[AlternativaMarcada] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -97,17 +153,36 @@ class AlternativaMarcadaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[AlternativaMarcada] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
 
-    public function deletar(array $params): void
+    /**
+     * O Router entrega os parâmetros da rota como argumentos posicionais
+     * (call_user_func_array com os grupos do regex). A assinatura
+     * anterior recebia um array e, ao chegar um int, o PHP lançava
+     * TypeError — que não é Exception e escapava dos catch, derrubando
+     * a requisição com 500 sem corpo. O DELETE de alternativa marcada
+     * nunca funcionou.
+     */
+    public function deletar(int $idUsuario, int $idAlternativa): void
     {
         try {
-            $idUsuario = (int) ($params["idUsuario"] ?? 0);
-            $idAlternativa = (int) ($params["idAlternativa"] ?? 0);
-
             $this->service->deletar($idUsuario, $idAlternativa);
 
             Response::json([
@@ -117,7 +192,21 @@ class AlternativaMarcadaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[AlternativaMarcada] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }

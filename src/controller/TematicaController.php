@@ -23,7 +23,21 @@ class TematicaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Tematica] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -38,7 +52,21 @@ class TematicaController
             }, $lista);
 
             Response::json($resultado);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Tematica] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -53,7 +81,21 @@ class TematicaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 404);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Tematica] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -72,7 +114,21 @@ class TematicaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Tematica] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }
@@ -89,7 +145,21 @@ class TematicaController
             Response::error($e->getMessage(), 400);
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            /*
+             * A mensagem genérica protege o usuário, mas o motivo
+             * precisa ficar registrado: era exatamente essa perda
+             * de informação que tornava o 500 impossível de
+             * diagnosticar.
+             */
+            error_log(sprintf(
+                "[Tematica] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             Response::error("Erro interno", 500);
         }
     }

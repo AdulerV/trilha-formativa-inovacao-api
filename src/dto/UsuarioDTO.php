@@ -24,11 +24,41 @@ class UsuarioDTO
             $dados["nomeAventureiro"],
             $dados["correioEletronico"],
             $dados["dataNascimento"] ?? null,
-            (bool) $dados["possuiConhecimento"] ?? false,
-            (bool) $dados["primeiroAcesso"],
+            isset($dados["possuiConhecimento"])
+                ? (bool) $dados["possuiConhecimento"]
+                : null,
+            (bool) ($dados["primeiroAcesso"] ?? false),
             false,
-            $dados["senha"] ?? $dados["novaSenha"],
+            /*
+             * Na edição a senha é opcional. Antes o acesso era
+             * `$dados["senha"] ?? $dados["novaSenha"]`: sem nenhuma das
+             * duas chaves o PHP emitia aviso de índice indefinido e
+             * passava null a um parâmetro `string`, virando TypeError —
+             * que não é Exception e escapava dos catch do controller,
+             * derrubando a requisição com 500 sem corpo.
+             */
+            self::extrairSenha($dados),
             new Ocupacao((int) $dados["idOcupacao"], "Qualquer")
         );
+    }
+
+    /**
+     * Senha em claro presente no corpo da requisição, se houver.
+     *
+     * `senha` é a chave do cadastro; `novaSenha`, a da edição. String
+     * vazia ou só espaços conta como ausência: enviar "" nunca deve
+     * ser interpretado como uma nova senha.
+     */
+    private static function extrairSenha(array $dados): ?string
+    {
+        foreach (["senha", "novaSenha"] as $chave) {
+            $valor = $dados[$chave] ?? null;
+
+            if (is_string($valor) && trim($valor) !== "") {
+                return $valor;
+            }
+        }
+
+        return null;
     }
 }

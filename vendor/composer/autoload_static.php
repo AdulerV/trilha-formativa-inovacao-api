@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit04a2e708c47e247d210839e2baf96abd
+class ComposerStaticInitb487a3d83015456f309062689f14275f
 {
     public static $files = array (
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
@@ -25,6 +25,7 @@ class ComposerStaticInit04a2e708c47e247d210839e2baf96abd
         array (
             'PhpParser\\' => 10,
             'PhpOption\\' => 10,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
         'G' => 
         array (
@@ -62,6 +63,10 @@ class ComposerStaticInit04a2e708c47e247d210839e2baf96abd
         'PhpOption\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'GrahamCampbell\\ResultType\\' => 
         array (
@@ -189,6 +194,7 @@ class ComposerStaticInit04a2e708c47e247d210839e2baf96abd
         'Dotenv\\Util\\Regex' => __DIR__ . '/..' . '/vlucas/phpdotenv/src/Util/Regex.php',
         'Dotenv\\Util\\Str' => __DIR__ . '/..' . '/vlucas/phpdotenv/src/Util/Str.php',
         'Dotenv\\Validator' => __DIR__ . '/..' . '/vlucas/phpdotenv/src/Validator.php',
+        'EmailService' => __DIR__ . '/../..' . '/src/service/EmailService.php',
         'Firebase\\JWT\\BeforeValidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/BeforeValidException.php',
         'Firebase\\JWT\\CachedKeySet' => __DIR__ . '/..' . '/firebase/php-jwt/src/CachedKeySet.php',
         'Firebase\\JWT\\ExpiredException' => __DIR__ . '/..' . '/firebase/php-jwt/src/ExpiredException.php',
@@ -220,6 +226,13 @@ class ComposerStaticInit04a2e708c47e247d210839e2baf96abd
         'OcupacaoDAO' => __DIR__ . '/../..' . '/src/dao/OcupacaoDAO.php',
         'OcupacaoDTO' => __DIR__ . '/../..' . '/src/dto/OcupacaoDTO.php',
         'OcupacaoService' => __DIR__ . '/../..' . '/src/service/OcupacaoService.php',
+        'PHPMailer\\PHPMailer\\DSNConfigurator' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/DSNConfigurator.php',
+        'PHPMailer\\PHPMailer\\Exception' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/Exception.php',
+        'PHPMailer\\PHPMailer\\OAuth' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/OAuth.php',
+        'PHPMailer\\PHPMailer\\OAuthTokenProvider' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/OAuthTokenProvider.php',
+        'PHPMailer\\PHPMailer\\PHPMailer' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/PHPMailer.php',
+        'PHPMailer\\PHPMailer\\POP3' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/POP3.php',
+        'PHPMailer\\PHPMailer\\SMTP' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/SMTP.php',
         'PHPUnit\\Exception' => __DIR__ . '/..' . '/phpunit/phpunit/src/Exception.php',
         'PHPUnit\\Framework\\ActualValueIsNotAnObjectException' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Exception/ActualValueIsNotAnObjectException.php',
         'PHPUnit\\Framework\\Assert' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert.php',
@@ -927,6 +940,10 @@ class ComposerStaticInit04a2e708c47e247d210839e2baf96abd
         'QuestaoDAO' => __DIR__ . '/../..' . '/src/dao/QuestaoDAO.php',
         'QuestaoDTO' => __DIR__ . '/../..' . '/src/dto/QuestaoDTO.php',
         'QuestaoService' => __DIR__ . '/../..' . '/src/service/QuestaoService.php',
+        'RecuperacaoSenha' => __DIR__ . '/../..' . '/src/model/RecuperacaoSenha.php',
+        'RecuperacaoSenhaController' => __DIR__ . '/../..' . '/src/controller/RecuperacaoSenhaController.php',
+        'RecuperacaoSenhaDAO' => __DIR__ . '/../..' . '/src/dao/RecuperacaoSenhaDAO.php',
+        'RecuperacaoSenhaService' => __DIR__ . '/../..' . '/src/service/RecuperacaoSenhaService.php',
         'RegraDeNegocioException' => __DIR__ . '/../..' . '/src/exception/RegraDeNegocioException.php',
         'Request' => __DIR__ . '/../..' . '/src/config/http/Request.php',
         'Response' => __DIR__ . '/../..' . '/src/config/http/Response.php',
@@ -1162,9 +1179,9 @@ class ComposerStaticInit04a2e708c47e247d210839e2baf96abd
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit04a2e708c47e247d210839e2baf96abd::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit04a2e708c47e247d210839e2baf96abd::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit04a2e708c47e247d210839e2baf96abd::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitb487a3d83015456f309062689f14275f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitb487a3d83015456f309062689f14275f::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitb487a3d83015456f309062689f14275f::$classMap;
 
         }, null, ClassLoader::class);
     }
