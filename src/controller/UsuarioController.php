@@ -322,4 +322,26 @@ class UsuarioController
             Response::error("Erro interno", 500);
         }
     }
+
+    public function alterarPrimeiroAcesso(int $id): void {
+        try {
+            $this->service->alterarPrimeiroAcesso($id);
+    
+            Response::json([
+                "mensagem" => "Primeiro acesso atualizado com sucesso!"
+            ]);
+        } catch (RegraDeNegocioException $e) {
+            Response::error($e->getMessage(), 400);
+        } catch (Throwable $e) {
+            error_log(sprintf(
+                "[Usuario] %s: %s em %s:%d",
+                get_class($e),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+    
+            Response::error("Erro interno", 500);
+        }
+    }
 }

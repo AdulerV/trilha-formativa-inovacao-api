@@ -25,3 +25,5 @@ $router->add("GET", "/api/v1/usuarios", [$usuarioController, "listar"]);
 $router->add("GET", "/api/v1/usuarios/{idUsuario}", [$usuarioController, "buscarPorId"]);
 $router->add("PUT", "/api/v1/usuarios/{idUsuario}", [$usuarioController, "atualizar"]);
 $router->add("DELETE", "/api/v1/usuarios/{idUsuario}", [$usuarioController, "deletar"]);
+
+$router->add("PATCH", "/api/v1/usuarios/{idUsuario}/primeiro-acesso",[$usuarioController, "alterarPrimeiroAcesso"]);

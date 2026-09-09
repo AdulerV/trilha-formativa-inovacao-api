@@ -351,4 +351,26 @@ class UsuarioDAO
             $registro["HashSenha"] ?? null
         );
     }
+
+    public function alterarPrimeiroAcesso(int $id): void {
+        try {
+            $sql = "UPDATE usuario
+                    SET PrimeiroAcesso = 0
+                    WHERE IdUsuario = :idUsuario";
+    
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":idUsuario", $id, PDO::PARAM_INT);
+            $stmt->execute();
+        } catch (PDOException $e) {
+            error_log(sprintf(
+                "[UsuarioDAO::alterarPrimeiroAcesso] usuario %s: %s",
+                $id,
+                $e->getMessage()
+            ));
+    
+            throw new Exception(
+                "Erro ao atualizar o primeiro acesso do usuário com ID igual a {$id}"
+            );
+        }
+    }
 }
