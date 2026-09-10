@@ -21,8 +21,8 @@ class TematicaDAO
             $stmt->execute();
 
             $tematica->setIdTematica((int) $this->conexao->lastInsertId());
-        } catch (PDOException) {
-            throw new Exception("Erro ao criar uma nova temática!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar as ocupações: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -40,8 +40,8 @@ class TematicaDAO
             $tematica = $this->mapearTematica($registro);
 
             return $tematica;
-        } catch (PDOException) {
-            throw new Exception("Erro ao buscar a temática de ID igual a {$idTematica}");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar as ocupações: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -60,8 +60,8 @@ class TematicaDAO
                 $tematicas[] = $this->mapearTematica($registro);
             }
             return $tematicas;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar as temáticas!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar as ocupações: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -74,8 +74,8 @@ class TematicaDAO
             $stmt->bindValue(":idTematica", $tematica->getIdTematica());
             $stmt->bindValue(":titulo", $tematica->getTitulo());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar a temática!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar as ocupações: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -87,8 +87,8 @@ class TematicaDAO
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idTematica", $idTematica);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao deletar a temática de ID igual a {$idTematica}");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar as ocupações: " . $e->getMessage(), 0, $e);
         }
     }
 

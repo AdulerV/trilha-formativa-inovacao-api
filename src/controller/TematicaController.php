@@ -38,7 +38,7 @@ class TematicaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 404);
         }
     }
 
@@ -67,7 +67,7 @@ class TematicaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 404);
         }
     }
 
@@ -96,7 +96,7 @@ class TematicaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 404);
         }
     }
 
@@ -129,7 +129,7 @@ class TematicaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 404);
         }
     }
 
@@ -160,7 +160,7 @@ class TematicaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 404);
         }
     }
 }
