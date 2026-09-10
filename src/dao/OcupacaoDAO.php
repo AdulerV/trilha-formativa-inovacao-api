@@ -48,7 +48,7 @@ class OcupacaoDAO
     public function listar(): array
     {
         try {
-            $sql = "SELECT * FROM OCUPACAO";
+            $sql = "SELECT * FROM ocupacao";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
