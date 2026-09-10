@@ -14,7 +14,7 @@ class TematicaDAO
     public function salvar(Tematica $tematica): void
     {
         try {
-            $sql = "INSERT INTO Tematica (Titulo) VALUES (:titulo)";
+            $sql = "INSERT INTO tematica (Titulo) VALUES (:titulo)";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":titulo", $tematica->getTitulo());
@@ -29,7 +29,7 @@ class TematicaDAO
     public function buscarPorId(int $idTematica): ?Tematica
     {
         try {
-            $sql = "SELECT * FROM Tematica WHERE IdTematica = :idTematica";
+            $sql = "SELECT * FROM tematica WHERE IdTematica = :idTematica";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idTematica", $idTematica);
@@ -48,7 +48,7 @@ class TematicaDAO
     public function listar(): array
     {
         try {
-            $sql = "SELECT * FROM Tematica";
+            $sql = "SELECT * FROM tematica";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
@@ -68,7 +68,7 @@ class TematicaDAO
     public function atualizar(Tematica $tematica)
     {
         try {
-            $sql = "UPDATE Tematica SET Titulo = :titulo WHERE IdTematica = :idTematica";
+            $sql = "UPDATE tematica SET Titulo = :titulo WHERE IdTematica = :idTematica";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idTematica", $tematica->getIdTematica());
@@ -82,7 +82,7 @@ class TematicaDAO
     public function deletar(int $idTematica)
     {
         try {
-            $sql = "DELETE FROM Tematica WHERE IdTematica = :idTematica";
+            $sql = "DELETE FROM tematica WHERE IdTematica = :idTematica";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idTematica", $idTematica);
@@ -94,7 +94,7 @@ class TematicaDAO
 
     public function verificarSeTematicaExiste(int $idTematica): bool
     {
-        $sql = "SELECT COUNT(*) FROM Tematica WHERE IdTematica = :idTematica";
+        $sql = "SELECT COUNT(*) FROM tematica WHERE IdTematica = :idTematica";
 
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(":idTematica", $idTematica);
@@ -105,7 +105,7 @@ class TematicaDAO
 
     public function verificarSeTituloExiste(string $titulo): bool
     {
-        $sql = "SELECT COUNT(*) FROM Tematica WHERE Titulo = :titulo";
+        $sql = "SELECT COUNT(*) FROM tematica WHERE Titulo = :titulo";
 
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(":titulo", $titulo);
