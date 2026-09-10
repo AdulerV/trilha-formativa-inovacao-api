@@ -51,9 +51,7 @@ class OcupacaoDAO
             $sql = "SELECT * FROM ocupacao";
 
             $stmt = $this->conexao->prepare($sql);
-            echo $stmt->execute();
-
-
+            $stmt->execute();
 
             $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $ocupacoes = [];
@@ -62,8 +60,9 @@ class OcupacaoDAO
                 $ocupacoes[] = $this->mapearOcupacao($registro);
             }
             return $ocupacoes;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar as ocupações!");
+        } catch (PDOException $e) {
+            // Exibe a mensagem original da PDOException
+            throw new Exception("Erro ao listar as ocupações: " . $e->getMessage(), 0, $e);
         }
     }
 
