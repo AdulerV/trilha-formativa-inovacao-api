@@ -8,7 +8,7 @@ class CorsMiddleware
 {
     public static function aplicar(): void
     {
-        header("Access-Control-Allow-Origin: http://localhost:5173");
+        header("Access-Control-Allow-Origin: https://sisgame.jf.ifsudestemg.edu.br/");
 
         //header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
         header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
