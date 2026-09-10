@@ -51,7 +51,9 @@ class OcupacaoDAO
             $sql = "SELECT * FROM ocupacao";
 
             $stmt = $this->conexao->prepare($sql);
-            $stmt->execute();
+            echo $stmt->execute();
+
+
 
             $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $ocupacoes = [];
