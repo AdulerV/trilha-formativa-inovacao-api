@@ -38,6 +38,8 @@ class UsuarioService
 
     public function salvar(Usuario $usuario): void
     {
+        echo $usuario;
+
         $this->validarCriacao($usuario);
         $this->usuarioDAO->salvar($usuario);
     }
