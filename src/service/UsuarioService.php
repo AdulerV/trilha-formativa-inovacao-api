@@ -170,4 +170,8 @@ class UsuarioService
             throw new RegraDeNegocioException("Nome de aventureiro já utilizado por outro usuário!");
         }
     }
+
+    public function alterarPrimeiroAcesso(int $id): void {
+        $this->usuarioDAO->alterarPrimeiroAcesso($id);
+    }
 }
