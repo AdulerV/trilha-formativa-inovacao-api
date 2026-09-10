@@ -25,8 +25,8 @@ class MissaoAtividadeTarefaDAO
             $stmt->bindValue(":idMissao", $idMissao);
             $stmt->bindValue(":idDistintivo", $missao->getDistintivo()->getIdDistintivo());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar missão do tipo atividade tarefa!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar missão do tipo atividade tarefa: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -61,8 +61,8 @@ class MissaoAtividadeTarefaDAO
             }
 
             return $missoes;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar missões do tipo atividade tarefa!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar missões do tipo atividade tarefa: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -96,8 +96,8 @@ class MissaoAtividadeTarefaDAO
             if (!$registro) {
                 return null;
             }
-            $missao = $this->mapearMissaoAtividadeTarefa($registro);
 
+            $missao = $this->mapearMissaoAtividadeTarefa($registro);
             $questoes = $this->questaoDAO->listarPorMissao($idMissao);
 
             foreach ($questoes as $questao) {
@@ -112,9 +112,10 @@ class MissaoAtividadeTarefaDAO
                     $questaoMissao
                 );
             }
+
             return $missao;
-        } catch (PDOException) {
-            throw new Exception("Erro ao buscar missão do tipo atividade tarefa!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao buscar missão do tipo atividade tarefa: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -122,15 +123,15 @@ class MissaoAtividadeTarefaDAO
     {
         try {
             $sql = "UPDATE missao_atividade_tarefa 
-                        SET IdDistintivo = :idDistintivo
-                        WHERE IdMissao = :idMissao";
+                    SET IdDistintivo = :idDistintivo
+                    WHERE IdMissao = :idMissao";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idMissao", $idMissao);
             $stmt->bindValue(":idDistintivo", $missao->getDistintivo()->getIdDistintivo());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar missão do tipo atividade tarefa!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar missão do tipo atividade tarefa: " . $e->getMessage(), 0, $e);
         }
     }
 

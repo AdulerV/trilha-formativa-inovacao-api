@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 class MissaoConteudoDAO
 {
     private PDO $conexao;
@@ -22,8 +23,8 @@ class MissaoConteudoDAO
             $stmt->bindValue(":resumo", $missao->getResumo());
             $stmt->bindValue(":tipoMaterial", $missao->getTipoMaterial());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar missão do tipo conteúdo!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar missão do tipo conteúdo: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -54,12 +55,12 @@ class MissaoConteudoDAO
             }
 
             return $missoes;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar missões do tipo conteúdo!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar missões do tipo conteúdo: " . $e->getMessage(), 0, $e);
         }
     }
 
-    public function buscarPorId(int $idMissao): MissaoConteudo
+    public function buscarPorId(int $idMissao): ?MissaoConteudo
     {
         try {
             $sql = "SELECT 
@@ -81,11 +82,10 @@ class MissaoConteudoDAO
             $stmt->execute();
 
             $registro = $stmt->fetch(PDO::FETCH_ASSOC);
-            $missao = $this->mapearMissaoConteudo($registro);
 
-            return $missao;
-        } catch (PDOException) {
-            throw new Exception("Erro ao encontrar missão do tipo conteúdo especificada!");
+            return $this->mapearMissaoConteudo($registro);
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao encontrar missão especificada: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -102,8 +102,8 @@ class MissaoConteudoDAO
             $stmt->bindValue(":tipoMaterial", $missao->getTipoMaterial());
             $stmt->bindValue(":idMissao", $missao->getIdMissao());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar missão do tipo conteúdo!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar missão do tipo conteúdo: " . $e->getMessage(), 0, $e);
         }
     }
 

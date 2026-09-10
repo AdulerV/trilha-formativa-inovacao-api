@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 class MissaoAtividadeDAO
 {
     private PDO $conexao;
@@ -28,36 +31,26 @@ class MissaoAtividadeDAO
             }
 
             $this->salvarEspecializacao($idMissao, $missao);
-        } catch (PDOException) {
-            throw new Exception(
-                "Erro ao salvar missão do tipo atividade!"
-            );
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar missão do tipo atividade: " . $e->getMessage(), 0, $e);
         }
     }
 
     private function inserirMissaoBase(int $idMissao, MissaoAtividade $missao): void
     {
-        try {
-            $sql = "INSERT INTO missao_atividade (IdMissao, TipoAtividade)
-                    VALUES (:idMissao, :tipoAtividade)";
+        $sql = "INSERT INTO missao_atividade (IdMissao, TipoAtividade)
+                VALUES (:idMissao, :tipoAtividade)";
 
-            $stmt = $this->conexao->prepare($sql);
-            $stmt->bindValue(":idMissao", $idMissao);
-            $stmt->bindValue(":tipoAtividade", $missao->getTipoAtividade());
-            $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar missão do tipo atividade!");
-        }
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->bindValue(":idMissao", $idMissao);
+        $stmt->bindValue(":tipoAtividade", $missao->getTipoAtividade());
+        $stmt->execute();
     }
 
     private function salvarEspecializacao(int $idMissao, MissaoAtividade $missao): void
     {
-        try {
-            if ($missao instanceof MissaoAtividadeTarefa) {
-                $this->tarefaDAO->salvar($idMissao, $missao);
-            }
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar especialização da missão base!");
+        if ($missao instanceof MissaoAtividadeTarefa) {
+            $this->tarefaDAO->salvar($idMissao, $missao);
         }
     }
 
@@ -79,7 +72,7 @@ class MissaoAtividadeDAO
                     INNER JOIN missao_atividade AS ma ON m.IdMissao = ma.IdMissao
                     LEFT JOIN missao_atividade_tarefa AS mat ON ma.IdMissao = mat.IdMissao
                     INNER JOIN tematica AS t ON t.IdTematica = m.IdTematica
-                    LEFT JOIN distintivo AS d ON d.IdDistintivo = mat.IdDistintivo;";
+                    LEFT JOIN distintivo AS d ON d.IdDistintivo = mat.IdDistintivo";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
@@ -87,27 +80,24 @@ class MissaoAtividadeDAO
             $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $missoes = [];
 
-
             foreach ($registros as $registro) {
                 $missao = $this->mapearMissaoAtividade($registro);
-
                 $this->adicionarQuestoesMissao($missao);
-
                 $missoes[] = $missao;
             }
 
             return $missoes;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar missões do tipo atividade!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar missões do tipo atividade: " . $e->getMessage(), 0, $e);
         }
     }
 
-    public function buscarPorId(int $idMissao): MissaoAtividade
+    public function buscarPorId(int $idMissao): ?MissaoAtividade
     {
         try {
             $sql = "SELECT TipoAtividade 
-            FROM missao_atividade 
-            WHERE IdMissao = :idMissao";
+                    FROM missao_atividade 
+                    WHERE IdMissao = :idMissao";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idMissao", $idMissao);
@@ -115,21 +105,23 @@ class MissaoAtividadeDAO
 
             $tipo = $stmt->fetchColumn();
 
-            return match (strtolower($tipo)) {
+            if ($tipo === false) {
+                return null;
+            }
+
+            return match (strtolower((string) $tipo)) {
                 MissaoAtividade::QUIZ => $this->buscarQuiz($idMissao),
-                MissaoAtividade::TAREFA => $this->tarefaDAO->buscarPorId($idMissao),
-                MissaoAtividade::TAREFA_FINAL => $this->tarefaDAO->buscarPorId($idMissao),
-                default => throw new Exception("Tipo de missão inválida!")
+                MissaoAtividade::TAREFA, MissaoAtividade::TAREFA_FINAL => $this->tarefaDAO->buscarPorId($idMissao),
+                default => throw new Exception("Tipo de missão de atividade inválido: '{$tipo}'")
             };
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar missões de atividade!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao buscar missão de atividade: " . $e->getMessage(), 0, $e);
         }
     }
 
-    private function buscarQuiz(int $idMissao): MissaoAtividade
+    private function buscarQuiz(int $idMissao): ?MissaoAtividade
     {
-        try {
-            $sql = "SELECT
+        $sql = "SELECT
                     m.IdMissao,
                     m.Titulo,
                     m.Pontuacao,
@@ -137,26 +129,24 @@ class MissaoAtividadeDAO
                     t.IdTematica,
                     t.Titulo AS TituloTematica
                 FROM missao AS m
-                INNER JOIN missao_atividade AS ma
-                    ON m.IdMissao = ma.IdMissao
-                INNER JOIN tematica AS t
-                    ON t.IdTematica = m.IdTematica
+                INNER JOIN missao_atividade AS ma ON m.IdMissao = ma.IdMissao
+                INNER JOIN tematica AS t ON t.IdTematica = m.IdTematica
                 WHERE ma.IdMissao = :idMissao";
 
-            $stmt = $this->conexao->prepare($sql);
-            $stmt->bindValue(":idMissao", $idMissao);
-            $stmt->execute();
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->bindValue(":idMissao", $idMissao);
+        $stmt->execute();
 
-            $registro = $stmt->fetch(PDO::FETCH_ASSOC);
+        $registro = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $missao = $this->mapearMissaoAtividade($registro);
-
-            $this->adicionarQuestoesMissao($missao);
-
-            return $missao;
-        } catch (PDOException) {
-            throw new Exception("Erro ao buscar missão do tipo de atividade quiz!");
+        if (!$registro) {
+            return null;
         }
+
+        $missao = $this->mapearMissaoAtividade($registro);
+        $this->adicionarQuestoesMissao($missao);
+
+        return $missao;
     }
 
     public function atualizar(MissaoAtividade $missao): void
@@ -177,8 +167,8 @@ class MissaoAtividadeDAO
                     $missao
                 );
             }
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar missão do tipo atividade!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar missão do tipo atividade: " . $e->getMessage(), 0, $e);
         }
     }
 
