@@ -48,28 +48,215 @@ class EmailService
      * Header Injection, em que um atacante induz a API a emitir um
      * link apontando para um domínio controlado por ele.
      */
-    public function enviarRecuperacaoSenha(Usuario $usuario, string $token, int $minutosDeValidade): void
-    {
+    public function enviarRecuperacaoSenha(
+        Usuario $usuario,
+        string $token,
+        int $minutosDeValidade
+    ): void {
         $link = $this->montarLinkDeRedefinicao($token);
 
-        $nome = htmlspecialchars($usuario->getNomeAventureiro(), ENT_QUOTES, "UTF-8");
-        $linkSeguro = htmlspecialchars($link, ENT_QUOTES, "UTF-8");
+        $nome = htmlspecialchars(
+            $usuario->getNomeAventureiro(),
+            ENT_QUOTES,
+            "UTF-8"
+        );
+
+        $linkSeguro = htmlspecialchars(
+            $link,
+            ENT_QUOTES,
+            "UTF-8"
+        );
+
+        $nomeAplicacao = htmlspecialchars(
+            $this->nomeAplicacao,
+            ENT_QUOTES,
+            "UTF-8"
+        );
 
         $corpoHtml = <<<HTML
-        <p>Olá, <strong>{$nome}</strong>!</p>
-        <p>Recebemos um pedido para redefinir a senha da sua conta na plataforma {$this->nomeAplicacao}.</p>
-        <p><a href="{$linkSeguro}">Clique aqui para cadastrar uma nova senha</a></p>
-        <p>Se o botão não funcionar, copie e cole o endereço abaixo no seu navegador:</p>
-        <p>{$linkSeguro}</p>
-        <p>O link é de uso único e expira em {$minutosDeValidade} minutos.</p>
-        <p>Se você não solicitou a redefinição, ignore esta mensagem: sua senha atual continua valendo.</p>
-        HTML;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinição de senha</title>
+</head>
+
+<body style="
+    margin: 0;
+    padding: 0;
+    background-color: #f1f4d7;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #281d15;
+">
+
+    <div style="
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e6c5;
+    ">
+
+        <!-- Cabeçalho -->
+        <div style="
+            background-color: #154c21;
+            padding: 28px 32px;
+            text-align: center;
+        ">
+            <h1 style="
+                margin: 0;
+                color: #ffffff;
+                font-size: 24px;
+                font-weight: 600;
+            ">
+                {$nomeAplicacao}
+            </h1>
+        </div>
+
+        <!-- Conteúdo -->
+        <div style="
+            padding: 36px 40px;
+        ">
+
+            <p style="
+                margin: 0 0 20px;
+                font-size: 16px;
+                line-height: 1.6;
+                color: #281d15;
+            ">
+                Olá, <strong>{$nome}</strong>!
+            </p>
+
+            <p style="
+                margin: 0 0 20px;
+                font-size: 15px;
+                line-height: 1.6;
+                color: #281d15;
+            ">
+                Recebemos um pedido para redefinir a senha da sua
+                conta na plataforma <strong>{$nomeAplicacao}</strong>.
+            </p>
+
+            <p style="
+                margin: 0 0 28px;
+                font-size: 15px;
+                line-height: 1.6;
+                color: #281d15;
+            ">
+                Para cadastrar uma nova senha, clique no botão abaixo:
+            </p>
+
+            <!-- Botão principal -->
+            <div style="
+                text-align: center;
+                margin: 0 0 30px;
+            ">
+                <a href="{$linkSeguro}" style="
+                    display: inline-block;
+                    padding: 14px 30px;
+                    background-color: #2f9e41;
+                    color: #ffffff;
+                    text-decoration: none;
+                    font-size: 15px;
+                    font-weight: bold;
+                    border-radius: 8px;
+                ">
+                    Redefinir minha senha
+                </a>
+            </div>
+
+            <!-- Link alternativo -->
+            <div style="
+                padding: 18px 20px;
+                background-color: #f1f4d7;
+                border-left: 4px solid #2f9e41;
+                border-radius: 6px;
+            ">
+                <p style="
+                    margin: 0;
+                    font-size: 13px;
+                    line-height: 1.6;
+                    color: #281d15;
+                ">
+                    <strong>Problemas com o botão?</strong><br>
+                    Você também pode acessar a redefinição de senha
+                    através deste
+                    <a href="{$linkSeguro}" style="
+                        color: #1100FF;
+                        font-weight: bold;
+                        text-decoration: underline;
+                    ">
+                        link alternativo
+                    </a>.
+                </p>
+            </div>
+
+            <!-- Validade -->
+            <div style="
+                margin-top: 28px;
+                padding: 16px 18px;
+                background-color: #f1f4d7;
+                border-radius: 8px;
+            ">
+                <p style="
+                    margin: 0;
+                    font-size: 13px;
+                    line-height: 1.6;
+                    color: #154c21;
+                ">
+                    <strong>Validade do link</strong><br>
+                    Por segurança, este link é de uso único e expira
+                    em <strong>{$minutosDeValidade} minutos</strong>.
+                </p>
+            </div>
+
+            <p style="
+                margin: 24px 0 0;
+                font-size: 13px;
+                line-height: 1.6;
+                color: #281d15;
+            ">
+                Se você não solicitou a redefinição da sua senha,
+                pode ignorar este e-mail. Sua senha atual continuará
+                válida.
+            </p>
+
+        </div>
+
+        <!-- Rodapé -->
+        <div style="
+            padding: 20px 32px;
+            background-color: #154c21;
+            text-align: center;
+        ">
+            <p style="
+                margin: 0;
+                font-size: 12px;
+                line-height: 1.5;
+                color: #ffffff;
+            ">
+                Este é um e-mail automático.
+                Por favor, não responda a esta mensagem.
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>
+HTML;
 
         $corpoTexto = "Olá, {$usuario->getNomeAventureiro()}!\n\n"
-            . "Recebemos um pedido para redefinir a senha da sua conta na plataforma {$this->nomeAplicacao}.\n\n"
-            . "Acesse o endereço abaixo para cadastrar uma nova senha:\n{$link}\n\n"
-            . "O link é de uso único e expira em {$minutosDeValidade} minutos.\n\n"
-            . "Se você não solicitou a redefinição, ignore esta mensagem: sua senha atual continua valendo.";
+            . "Recebemos um pedido para redefinir a senha da sua conta "
+            . "na plataforma {$this->nomeAplicacao}.\n\n"
+            . "Acesse o endereço abaixo para cadastrar uma nova senha:\n"
+            . "{$link}\n\n"
+            . "O link é de uso único e expira em "
+            . "{$minutosDeValidade} minutos.\n\n"
+            . "Se você não solicitou a redefinição da sua senha, "
+            . "pode ignorar este e-mail. Sua senha atual continuará válida.";
 
         $this->enviar(
             $usuario->getCorreioEletronico(),
