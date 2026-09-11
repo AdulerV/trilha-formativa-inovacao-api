@@ -14,15 +14,15 @@ class AlternativaOrdenacaoDAO
     public function salvar(int $idAlternativa, AlternativaOrdenacao $alternativa): void
     {
         try {
-            $sql = "INSERT INTO ALTERNATIVA_ORDENACAO (IdAlternativa, NumeroSequencia)
+            $sql = "INSERT INTO alternativa_ordenacao (IdAlternativa, NumeroSequencia)
                     VALUES (:idAlternativa, :numeroSequencia)";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idAlternativa", $idAlternativa, PDO::PARAM_INT);
             $stmt->bindValue(":numeroSequencia", $alternativa->getNumeroSequencia(), PDO::PARAM_INT);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar alternativa do tipo ordenação!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar alternativa do tipo ordenação: " . $e->getMessage());
         }
     }
 
@@ -34,7 +34,7 @@ class AlternativaOrdenacaoDAO
                         a.Texto,
                         a.IdQuestao,
                         ao.NumeroSequencia
-                    FROM ALTERNATIVA_ORDENACAO AS ao
+                    FROM alternativa_ordenacao AS ao
                     INNER JOIN alternativa AS a ON a.IdAlternativa = ao.IdAlternativa";
 
             $stmt = $this->conexao->prepare($sql);
@@ -48,8 +48,8 @@ class AlternativaOrdenacaoDAO
             }
 
             return $alternativas;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar alternativas do tipo ordenacao!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar alternativas do tipo ordenacao: " . $e->getMessage());
         }
     }
 
@@ -61,7 +61,7 @@ class AlternativaOrdenacaoDAO
                         a.Texto,
                         a.IdQuestao,
                         ao.NumeroSequencia
-                    FROM ALTERNATIVA_ORDENACAO AS ao
+                    FROM alternativa_ordenacao AS ao
                     INNER JOIN alternativa AS a ON a.IdAlternativa = ao.IdAlternativa
                     WHERE a.IdQuestao = :idQuestao
                     ORDER BY ao.NumeroSequencia ASC";
@@ -78,8 +78,8 @@ class AlternativaOrdenacaoDAO
             }
 
             return $alternativas;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar alternativas de ordenacao para a questao especificada!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar alternativas de ordenacao para a questao especificada: " . $e->getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ class AlternativaOrdenacaoDAO
                         a.Texto,
                         a.IdQuestao,
                         ao.NumeroSequencia
-                    FROM ALTERNATIVA_ORDENACAO AS ao
+                    FROM alternativa_ordenacao AS ao
                     INNER JOIN alternativa AS a ON a.IdAlternativa = ao.IdAlternativa
                     WHERE ao.IdAlternativa = :idAlternativa";
 
@@ -106,8 +106,8 @@ class AlternativaOrdenacaoDAO
             }
 
             return $this->mapearAlternativaOrdenacao($registro);
-        } catch (PDOException) {
-            throw new Exception("Erro ao encontrar alternativa do tipo ordenacao especificada!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao encontrar alternativa do tipo ordenacao especificada: " . $e->getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ class AlternativaOrdenacaoDAO
     {
         try {
             $sql = "SELECT NumeroSequencia
-            FROM ALTERNATIVA_ORDENACAO
+            FROM alternativa_ordenacao
             WHERE IdAlternativa = :idAlternativa";
 
             $stmt = $this->conexao->prepare($sql);
@@ -124,10 +124,10 @@ class AlternativaOrdenacaoDAO
 
             $numeroSequenciaAtual = (int) $stmt->fetchColumn();
 
-            $sql = "UPDATE ALTERNATIVA_ORDENACAO ao
-            INNER JOIN ALTERNATIVA a1
+            $sql = "UPDATE alternativa_ordenacao ao
+            INNER JOIN alternativa a1
                 ON ao.IdAlternativa = a1.IdAlternativa
-            INNER JOIN ALTERNATIVA a2
+            INNER JOIN alternativa a2
                 ON a1.IdQuestao = a2.IdQuestao
             SET ao.NumeroSequencia = :numeroSequenciaAtual
             WHERE a2.IdAlternativa = :idAlternativa
@@ -139,7 +139,7 @@ class AlternativaOrdenacaoDAO
             $stmt->bindValue(":idAlternativa", $alternativa->getIdAlternativa(), PDO::PARAM_INT);
             $stmt->execute();
 
-            $sql = "UPDATE ALTERNATIVA_ORDENACAO
+            $sql = "UPDATE alternativa_ordenacao
             SET NumeroSequencia = :numeroSequencia
             WHERE IdAlternativa = :idAlternativa";
 
@@ -147,8 +147,8 @@ class AlternativaOrdenacaoDAO
             $stmt->bindValue(":numeroSequencia", $alternativa->getNumeroSequencia(), PDO::PARAM_INT);
             $stmt->bindValue(":idAlternativa", $alternativa->getIdAlternativa(), PDO::PARAM_INT);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar alternativa do tipo ordenacao!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar alternativa do tipo ordenacao: " . $e->getMessage());
         }
     }
 

@@ -46,7 +46,7 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -75,7 +75,7 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -104,7 +104,7 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -133,7 +133,7 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -168,7 +168,7 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -207,7 +207,7 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 }

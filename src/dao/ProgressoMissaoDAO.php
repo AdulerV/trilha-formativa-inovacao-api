@@ -24,9 +24,11 @@ class ProgressoMissaoDAO
             $this->salvarEspecializacao($progresso);
 
             $this->conexao->commit();
-        } catch (PDOException) {
-            $this->conexao->rollBack();
-            throw new Exception("Erro ao salvar progresso!");
+        } catch (Exception $e) {
+            if ($this->conexao->inTransaction()) {
+                $this->conexao->rollBack();
+            }
+            throw new Exception("Erro ao salvar progresso: " . $e->getMessage());
         }
     }
 
@@ -41,8 +43,8 @@ class ProgressoMissaoDAO
             $stmt->bindValue(":idMissao", $progresso->getMissao()->getIdMissao());
             $stmt->bindValue(":progresso", $progresso->getProgresso());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar progresso base!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar progresso base: " . $e->getMessage());
         }
     }
 
@@ -52,61 +54,73 @@ class ProgressoMissaoDAO
             if ($progresso instanceof ProgressoMissaoAtividade) {
                 $this->progressoAtividadeDAO->salvar($progresso);
             }
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar especialização do progresso base!");
+        } catch (Exception $e) {
+            throw new Exception("Erro ao salvar especialização do progresso base: " . $e->getMessage());
         }
     }
 
     public function buscarPorId(int $idUsuario, int $idMissao): ProgressoMissao
     {
-        $sql = $this->getSqlBase() . " WHERE p.IdUsuario = :idUsuario AND p.IdMissao = :idMissao";
+        try {
+            $sql = $this->getSqlBase() . " WHERE p.IdUsuario = :idUsuario AND p.IdMissao = :idMissao";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":idUsuario", $idUsuario);
-        $stmt->bindValue(":idMissao", $idMissao);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":idUsuario", $idUsuario);
+            $stmt->bindValue(":idMissao", $idMissao);
+            $stmt->execute();
 
-        $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+            $dados = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$dados) {
-            throw new Exception("Progresso de missão não encontrado.");
+            if (!$dados) {
+                throw new Exception("Progresso de missão não encontrado.");
+            }
+
+            return $this->processarRegistroProgresso($dados);
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao buscar progresso de missão por ID: " . $e->getMessage());
         }
-
-        return $this->processarRegistroProgresso($dados);
     }
 
     public function listar(): array
     {
-        $sql = $this->getSqlBase();
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->execute();
+        try {
+            $sql = $this->getSqlBase();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
 
-        $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $progressoLista = [];
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $progressoLista = [];
 
-        foreach ($dados as $linha) {
-            $progressoLista[] = $this->processarRegistroProgresso($linha);
+            foreach ($dados as $linha) {
+                $progressoLista[] = $this->processarRegistroProgresso($linha);
+            }
+
+            return $progressoLista;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar progressos de missão: " . $e->getMessage());
         }
-
-        return $progressoLista;
     }
 
     public function listarPorUsuario(int $idUsuario): array
     {
-        $sql = $this->getSqlBase() . " WHERE p.IdUsuario = :idUsuario";
+        try {
+            $sql = $this->getSqlBase() . " WHERE p.IdUsuario = :idUsuario";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":idUsuario", $idUsuario);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":idUsuario", $idUsuario);
+            $stmt->execute();
 
-        $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $progressoLista = [];
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $progressoLista = [];
 
-        foreach ($dados as $linha) {
-            $progressoLista[] = $this->processarRegistroProgresso($linha);
+            foreach ($dados as $linha) {
+                $progressoLista[] = $this->processarRegistroProgresso($linha);
+            }
+
+            return $progressoLista;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar progressos de missão por usuário: " . $e->getMessage());
         }
-
-        return $progressoLista;
     }
 
     public function atualizar(ProgressoMissao $progresso): void
@@ -129,9 +143,11 @@ class ProgressoMissaoDAO
             }
 
             $this->conexao->commit();
-        } catch (PDOException) {
-            $this->conexao->rollBack();
-            throw new Exception("Erro ao atualizar progresso!");
+        } catch (Exception $e) {
+            if ($this->conexao->inTransaction()) {
+                $this->conexao->rollBack();
+            }
+            throw new Exception("Erro ao atualizar progresso: " . $e->getMessage());
         }
     }
 
@@ -145,22 +161,26 @@ class ProgressoMissaoDAO
             $stmt->bindValue(":idUsuario", $idUsuario);
             $stmt->bindValue(":idMissao", $idMissao);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao deletar progresso!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao deletar progresso: " . $e->getMessage());
         }
     }
 
     public function verificarSeProgressoMissaoExiste(int $idUsuario, int $idMissao): bool
     {
-        $sql = "SELECT COUNT(*) FROM progresso_missao 
-                WHERE IdUsuario = :idUsuario AND IdMissao = :idMissao";
+        try {
+            $sql = "SELECT COUNT(*) FROM progresso_missao 
+                    WHERE IdUsuario = :idUsuario AND IdMissao = :idMissao";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':idUsuario', $idUsuario);
-        $stmt->bindValue(':idMissao', $idMissao);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':idUsuario', $idUsuario);
+            $stmt->bindValue(':idMissao', $idMissao);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se o progresso da missão existe: " . $e->getMessage());
+        }
     }
 
     private function getSqlBase(): string
@@ -188,15 +208,6 @@ class ProgressoMissaoDAO
     INNER JOIN tematica t ON m.IdTematica = t.IdTematica";
     }
 
-    /**
-     * Monta o progresso a partir da linha já trazida pelo JOIN.
-     *
-     * Antes, a variante "atividade" era delegada a um mapeador que
-     * disparava MissaoAtividadeDAO::buscarPorId() para CADA linha —
-     * e esse método carrega questões e alternativas da missão, dados
-     * que nenhuma tela consome no progresso. Era um N+1 completo em
-     * cima de uma consulta que já traz tudo o que o DTO precisa.
-     */
     private function processarRegistroProgresso(array $dados): ProgressoMissao
     {
         $usuario = $this->mapearUsuario($dados);

@@ -14,7 +14,7 @@ class AlternativaMarcadaDAO
     /**
      * Grava a marcação, substituindo a anterior da mesma alternativa.
      *
-     * A chave primária de ALTERNATIVA_MARCADA é (IdUsuario,
+     * A chave primária de alternativa_marcada é (IdUsuario,
      * IdAlternativa): ao responder o quiz de novo, o INSERT puro
      * violava a chave e o serviço devolvia "Esta alternativa já foi
      * marcada por este usuário!". O resultado era que apenas a
@@ -52,8 +52,8 @@ class AlternativaMarcadaDAO
             $stmt->bindValue(":idAlternativaAssociadaRespondida", $alternativaMarcada->getIdAlternativaAssociadaRespondida(), $alternativaMarcada->getIdAlternativaAssociadaRespondida() === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
 
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar alternativa marcada!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar alternativa marcada: " . $e->getMessage());
         }
     }
 
@@ -90,8 +90,8 @@ class AlternativaMarcadaDAO
             }
 
             return $this->mapearAlternativaMarcada($registro);
-        } catch (PDOException) {
-            throw new Exception("Erro ao buscar alternativa marcada!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao buscar alternativa marcada: " . $e->getMessage());
         }
     }
 
@@ -126,8 +126,8 @@ class AlternativaMarcadaDAO
             }
 
             return $lista;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar alternativas marcadas!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar alternativas marcadas: " . $e->getMessage());
         }
     }
 
@@ -163,8 +163,8 @@ class AlternativaMarcadaDAO
                 $lista[] = $this->mapearAlternativaMarcada($registro);
             }
             return $lista;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar alternativas marcadas pelo usuário de ID {$idUsuario}");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar alternativas marcadas pelo usuário de ID {$idUsuario}: " . $e->getMessage());
         }
     }
 
@@ -186,8 +186,8 @@ class AlternativaMarcadaDAO
             $stmt->bindValue(":idAlternativa", $alternativaMarcada->getAlternativa()->getIdAlternativa(), PDO::PARAM_INT);
 
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar alternativa marcada!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar alternativa marcada: " . $e->getMessage());
         }
     }
 
@@ -200,8 +200,8 @@ class AlternativaMarcadaDAO
             $stmt->bindValue(":idUsuario", $idUsuario);
             $stmt->bindValue(":idAlternativa", $idAlternativa);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao deletar alternativa marcada!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao deletar alternativa marcada: " . $e->getMessage());
         }
     }
 

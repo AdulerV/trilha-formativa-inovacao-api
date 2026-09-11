@@ -26,8 +26,8 @@ class ProgressoMissaoAtividadeDAO
     {
         try {
             $sql = "INSERT INTO progresso_missao_atividade 
-            (IdUsuario, IdMissao, TentativasRealizadas, PontuacaoObtida)
-            VALUES (:idUsuario, :idMissao, :tentativasRealizadas, :pontuacaoObtida)";
+                    (IdUsuario, IdMissao, TentativasRealizadas, PontuacaoObtida)
+                    VALUES (:idUsuario, :idMissao, :tentativasRealizadas, :pontuacaoObtida)";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idUsuario", $progresso->getUsuario()->getIdUsuario());
@@ -35,8 +35,8 @@ class ProgressoMissaoAtividadeDAO
             $stmt->bindValue(":tentativasRealizadas", $progresso->getTentativasRealizadas());
             $stmt->bindValue(":pontuacaoObtida", $progresso->getPontuacaoObtida());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar progresso de missão do tipo atividade!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar progresso de missão do tipo atividade: " . $e->getMessage());
         }
     }
 
@@ -44,9 +44,9 @@ class ProgressoMissaoAtividadeDAO
     {
         try {
             $sql = "UPDATE progresso_missao_atividade
-            SET TentativasRealizadas = :tentativas,
-                PontuacaoObtida = :pontuacao
-            WHERE IdUsuario = :idUsuario AND IdMissao = :idMissao";
+                    SET TentativasRealizadas = :tentativas,
+                        PontuacaoObtida = :pontuacao
+                    WHERE IdUsuario = :idUsuario AND IdMissao = :idMissao";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":tentativas", $progresso->getTentativasRealizadas());
@@ -54,9 +54,40 @@ class ProgressoMissaoAtividadeDAO
             $stmt->bindValue(":idUsuario", $progresso->getUsuario()->getIdUsuario());
             $stmt->bindValue(":idMissao", $progresso->getMissao()->getIdMissao());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar progresso de missão do tipo atividade!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar progresso de missão do tipo atividade: " . $e->getMessage());
         }
     }
 
+    public function deletar(int $idUsuario, int $idMissao): void
+    {
+        try {
+            $sql = "DELETE FROM progresso_missao_atividade 
+                    WHERE IdUsuario = :idUsuario AND IdMissao = :idMissao";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":idUsuario", $idUsuario);
+            $stmt->bindValue(":idMissao", $idMissao);
+            $stmt->execute();
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao deletar progresso de missão do tipo atividade: " . $e->getMessage());
+        }
+    }
+
+    public function verificarSeProgressoExiste(int $idUsuario, int $idMissao): bool
+    {
+        try {
+            $sql = "SELECT COUNT(*) FROM progresso_missao_atividade 
+                    WHERE IdUsuario = :idUsuario AND IdMissao = :idMissao";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":idUsuario", $idUsuario);
+            $stmt->bindValue(":idMissao", $idMissao);
+            $stmt->execute();
+
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se o progresso de missão atividade existe: " . $e->getMessage());
+        }
+    }
 }

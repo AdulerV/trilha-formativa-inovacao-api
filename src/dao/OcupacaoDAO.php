@@ -21,8 +21,8 @@ class OcupacaoDAO
             $stmt->execute();
 
             $ocupacao->setIdOcupacao((int) $this->conexao->lastInsertId());
-        } catch (PDOException) {
-            throw new Exception("Erro ao criar uma nova ocupação!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao criar uma nova ocupação: " . $e->getMessage());
         }
     }
 
@@ -37,11 +37,13 @@ class OcupacaoDAO
 
             $registro = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $ocupacao = $this->mapearOcupacao($registro);
+            if (!$registro) {
+                throw new Exception("Ocupação de ID {$idOcupacao} não encontrada.");
+            }
 
-            return $ocupacao;
-        } catch (PDOException) {
-            throw new Exception("Erro ao buscar a ocupação de ID igual a {$idOcupacao}");
+            return $this->mapearOcupacao($registro);
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao buscar a ocupação de ID igual a {$idOcupacao}: " . $e->getMessage());
         }
     }
 
@@ -61,8 +63,7 @@ class OcupacaoDAO
             }
             return $ocupacoes;
         } catch (PDOException $e) {
-            // Exibe a mensagem original da PDOException
-            throw new Exception("Erro ao listar as ocupações: " . $e->getMessage(), 0, $e);
+            throw new Exception("Erro ao listar as ocupações: " . $e->getMessage());
         }
     }
 
@@ -75,8 +76,8 @@ class OcupacaoDAO
             $stmt->bindValue(":idOcupacao", $ocupacao->getIdOcupacao());
             $stmt->bindValue(":titulo", $ocupacao->getTitulo());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar a ocupação!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar a ocupação: " . $e->getMessage());
         }
     }
 
@@ -88,52 +89,62 @@ class OcupacaoDAO
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idOcupacao", $idOcupacao);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao deletar a ocupação de ID igual a {$idOcupacao}");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao deletar a ocupação de ID igual a {$idOcupacao}: " . $e->getMessage());
         }
     }
 
     public function verificarSeOcupacaoExiste(int $idOcupacao): bool
     {
-        $sql = "SELECT COUNT(*) FROM ocupacao WHERE IdOcupacao = :idOcupacao";
+        try {
+            $sql = "SELECT COUNT(*) FROM ocupacao WHERE IdOcupacao = :idOcupacao";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":idOcupacao", $idOcupacao);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":idOcupacao", $idOcupacao);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se a ocupação existe: " . $e->getMessage());
+        }
     }
 
     public function verificarSeTituloExiste(string $titulo): bool
     {
-        $sql = "SELECT COUNT(*) FROM ocupacao WHERE LOWER(Titulo) = LOWER(:titulo)";
+        try {
+            $sql = "SELECT COUNT(*) FROM ocupacao WHERE LOWER(Titulo) = LOWER(:titulo)";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":titulo", $titulo);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":titulo", $titulo);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se o título existe: " . $e->getMessage());
+        }
     }
 
     public function verificarTituloParaOutraOcupacao(string $titulo, int $idOcupacao): bool
     {
-        $sql = "SELECT COUNT(*) FROM ocupacao WHERE LOWER(Titulo) = LOWER(:titulo) AND IdOcupacao != :idOcupacao";
+        try {
+            $sql = "SELECT COUNT(*) FROM ocupacao WHERE LOWER(Titulo) = LOWER(:titulo) AND IdOcupacao != :idOcupacao";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":titulo", $titulo);
-        $stmt->bindValue(":idOcupacao", $idOcupacao);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":titulo", $titulo);
+            $stmt->bindValue(":idOcupacao", $idOcupacao);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar título para outra ocupação: " . $e->getMessage());
+        }
     }
 
     public function mapearOcupacao(array $registro): Ocupacao
     {
-        $ocupacao = new Ocupacao(
+        return new Ocupacao(
             (int) $registro["IdOcupacao"],
             $registro["Titulo"]
         );
-
-        return $ocupacao;
     }
 }

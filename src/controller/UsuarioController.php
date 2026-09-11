@@ -74,7 +74,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -112,7 +112,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -162,7 +162,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -230,7 +230,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -274,7 +274,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -318,7 +318,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -411,7 +411,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -442,7 +442,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -479,7 +479,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 }

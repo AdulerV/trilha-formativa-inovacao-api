@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 class DistintivoDAO
 {
     private PDO $conexao;
@@ -13,7 +15,7 @@ class DistintivoDAO
     {
         try {
             $sql = "INSERT INTO distintivo (Titulo, Pontuacao, NomeArquivo)
-                VALUES (:titulo, :pontuacao, :nomeArquivo)";
+                    VALUES (:titulo, :pontuacao, :nomeArquivo)";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":titulo", $distintivo->getTitulo());
@@ -22,8 +24,8 @@ class DistintivoDAO
             $stmt->execute();
 
             $distintivo->setIdDistintivo((int) $this->conexao->lastInsertId());
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar distintivo!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar distintivo: " . $e->getMessage());
         }
     }
 
@@ -43,8 +45,8 @@ class DistintivoDAO
             }
 
             return $this->mapearDistintivo($registro);
-        } catch (PDOException) {
-            throw new Exception("Erro ao buscar distintivo de ID igual a {$idDistintivo}");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao buscar distintivo de ID igual a {$idDistintivo}: " . $e->getMessage());
         }
     }
 
@@ -68,17 +70,17 @@ class DistintivoDAO
             }
 
             return $distintivos;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar distintivos!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar distintivos: " . $e->getMessage());
         }
     }
 
-    public function atualizar(Distintivo $distintivo)
+    public function atualizar(Distintivo $distintivo): void
     {
         try {
             $sql = "UPDATE distintivo 
-            SET Titulo = :titulo, Pontuacao = :pontuacao, NomeArquivo = :nomeArquivo
-            WHERE IdDistintivo = :idDistintivo";
+                    SET Titulo = :titulo, Pontuacao = :pontuacao, NomeArquivo = :nomeArquivo
+                    WHERE IdDistintivo = :idDistintivo";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":titulo", $distintivo->getTitulo());
@@ -87,8 +89,8 @@ class DistintivoDAO
             $stmt->bindValue(":idDistintivo", $distintivo->getIdDistintivo());
 
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar distintivo!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar distintivo: " . $e->getMessage());
         }
     }
 
@@ -100,81 +102,105 @@ class DistintivoDAO
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idDistintivo", $idDistintivo);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao deletar distintivo!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao deletar distintivo: " . $e->getMessage());
         }
     }
 
     public function getPontuacaoMaxima(): float
     {
-        $sql = "SELECT COUNT(*) FROM tematica";
+        try {
+            $sql = "SELECT COUNT(*) FROM tematica";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
 
-        $numeroTrilhas = $stmt->fetchColumn();
-        $numeroTrilhas = ($numeroTrilhas > 0 ? $numeroTrilhas : 1);
+            $numeroTrilhas = (int) $stmt->fetchColumn();
+            $numeroTrilhas = ($numeroTrilhas > 0 ? $numeroTrilhas : 1);
 
-        return ((9999 / $numeroTrilhas) * 0.1);
+            return ((9999 / $numeroTrilhas) * 0.1);
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao calcular pontuação máxima: " . $e->getMessage());
+        }
     }
 
     public function verificarSeDistintivoExiste(int $idDistintivo): bool
     {
-        $sql = "SELECT count(*) FROM distintivo WHERE IdDistintivo = :idDistintivo";
+        try {
+            $sql = "SELECT COUNT(*) FROM distintivo WHERE IdDistintivo = :idDistintivo";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":idDistintivo", $idDistintivo);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":idDistintivo", $idDistintivo);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se o distintivo existe: " . $e->getMessage());
+        }
     }
 
     public function verificarSeTituloExiste(string $titulo): bool
     {
-        $sql = "SELECT COUNT(*) FROM distintivo WHERE Titulo = :titulo";
+        try {
+            $sql = "SELECT COUNT(*) FROM distintivo WHERE Titulo = :titulo";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":titulo", $titulo);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":titulo", $titulo);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se o título existe: " . $e->getMessage());
+        }
     }
 
     public function verificarSeNomeArquivoExiste(string $nomeArquivo): bool
     {
-        $sql = "SELECT COUNT(*) FROM distintivo 
-                WHERE NomeArquivo = :nomeArquivo 
-                AND NomeArquivo NOT LIKE 'badgeDefault.svg'";
+        try {
+            $sql = "SELECT COUNT(*) FROM distintivo 
+                    WHERE NomeArquivo = :nomeArquivo 
+                    AND NomeArquivo NOT LIKE 'badgeDefault.svg'";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":nomeArquivo", $nomeArquivo);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":nomeArquivo", $nomeArquivo);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se o nome do arquivo existe: " . $e->getMessage());
+        }
     }
 
     public function verificarTituloParaOutroDistintivo(string $titulo, int $idDistintivo): bool
     {
-        $sql = "SELECT COUNT(*) FROM distintivo WHERE LOWER(Titulo) = LOWER(:titulo) AND IdDistintivo != :idDistintivo";
+        try {
+            $sql = "SELECT COUNT(*) FROM distintivo WHERE LOWER(Titulo) = LOWER(:titulo) AND IdDistintivo != :idDistintivo";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":titulo", $titulo);
-        $stmt->bindValue(":idDistintivo", $idDistintivo);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":titulo", $titulo);
+            $stmt->bindValue(":idDistintivo", $idDistintivo);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar título para outro distintivo: " . $e->getMessage());
+        }
     }
 
     public function verificarNomeArquivoParaOutroDistintivo(string $nomeArquivo, int $idDistintivo): bool
     {
-        $sql = "SELECT COUNT(*) FROM distintivo WHERE LOWER(NomeArquivo) = LOWER(:nomeArquivo) AND IdDistintivo != :idDistintivo AND NomeArquivo NOT LIKE 'badgeDefault.svg'";
+        try {
+            $sql = "SELECT COUNT(*) FROM distintivo WHERE LOWER(NomeArquivo) = LOWER(:nomeArquivo) AND IdDistintivo != :idDistintivo AND NomeArquivo NOT LIKE 'badgeDefault.svg'";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(":nomeArquivo", $nomeArquivo);
-        $stmt->bindValue(":idDistintivo", $idDistintivo);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(":nomeArquivo", $nomeArquivo);
+            $stmt->bindValue(":idDistintivo", $idDistintivo);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar nome do arquivo para outro distintivo: " . $e->getMessage());
+        }
     }
 
     public function mapearDistintivo(array $registro): Distintivo

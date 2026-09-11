@@ -75,7 +75,7 @@ class RecuperacaoSenhaController
                 $e->getLine()
             ));
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
@@ -103,7 +103,7 @@ class RecuperacaoSenhaController
         } catch (Exception $e) {
             error_log("[recuperacao-senha] Erro na redefinição: " . $e->getMessage());
 
-            Response::error("Erro interno", 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 

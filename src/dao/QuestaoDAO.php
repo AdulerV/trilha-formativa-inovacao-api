@@ -28,8 +28,8 @@ class QuestaoDAO
 
             $idQuestao = (int) $this->conexao->lastInsertId();
             $questao->setIdQuestao($idQuestao);
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar questão!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar questão: " . $e->getMessage());
         }
     }
 
@@ -99,8 +99,8 @@ class QuestaoDAO
             $this->adicionarAlternativasNaQuestao($questao);
 
             return $questao;
-        } catch (PDOException) {
-            throw new Exception("Erro ao buscar questão!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao buscar questão: " . $e->getMessage());
         }
     }
 
@@ -114,8 +114,8 @@ class QuestaoDAO
             $stmt->execute();
 
             return (int) $stmt->fetchColumn();
-        } catch (PDOException) {
-            throw new Exception("Erro ao buscar id da missão!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao buscar id da missão: " . $e->getMessage());
         }
     }
 
@@ -132,8 +132,8 @@ class QuestaoDAO
             $stmt->bindValue(":mensagemCorrecao", $questao->getMensagemCorrecao());
             $stmt->bindValue(":idQuestao", $questao->getIdQuestao());
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar questão!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar questão: " . $e->getMessage());
         }
     }
 
@@ -144,8 +144,8 @@ class QuestaoDAO
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idQuestao", $idQuestao);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao deletar questão!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao deletar questão: " . $e->getMessage());
         }
     }
 
@@ -190,82 +190,106 @@ class QuestaoDAO
 
     public function verificarSeQuestaoExistePorId(int $idQuestao): bool
     {
-        $sql = "SELECT COUNT(*) FROM questao WHERE IdQuestao = :idQuestao";
+        try {
+            $sql = "SELECT COUNT(*) FROM questao WHERE IdQuestao = :idQuestao";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':idQuestao', $idQuestao);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':idQuestao', $idQuestao);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se questão existe por ID: " . $e->getMessage());
+        }
     }
 
     public function verificarSeEnunciadoExiste(int $idMissao, string $enunciado): bool 
     {
-        $sql = "SELECT COUNT(*) FROM questao 
-            WHERE Enunciado = :enunciado 
-            AND IdMissao = :idMissao";
+        try {
+            $sql = "SELECT COUNT(*) FROM questao 
+                WHERE Enunciado = :enunciado 
+                AND IdMissao = :idMissao";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':enunciado', $enunciado);
-        $stmt->bindValue(':idMissao', $idMissao);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':enunciado', $enunciado);
+            $stmt->bindValue(':idMissao', $idMissao);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se enunciado existe: " . $e->getMessage());
+        }
     }
 
     public function verificarEnunciadoParaOutraQuestao(string $enunciado, int $idQuestao): bool 
     {
-        $sql = "SELECT COUNT(*)
-        FROM questao q
-        WHERE q.Enunciado = :enunciado
-          AND q.IdQuestao != :idQuestao
-          AND q.IdMissao = (
-                SELECT IdMissao
-                FROM questao
-                WHERE IdQuestao = :idQuestao
-          )";
+        try {
+            $sql = "SELECT COUNT(*)
+            FROM questao q
+            WHERE q.Enunciado = :enunciado
+              AND q.IdQuestao != :idQuestao
+              AND q.IdMissao = (
+                    SELECT IdMissao
+                    FROM questao
+                    WHERE IdQuestao = :idQuestao
+              )";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':enunciado', $enunciado);
-        $stmt->bindValue(':idQuestao', $idQuestao);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':enunciado', $enunciado);
+            $stmt->bindValue(':idQuestao', $idQuestao);
+            $stmt->execute();
 
-        return (int) $stmt->fetchColumn() > 0;
+            return (int) $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar enunciado para outra questão: " . $e->getMessage());
+        }
     }
 
     public function verificarSeQuestaoExiste(string $enunciado, int $idMissao): bool
     {
-        $sql = "SELECT COUNT(*) FROM questao 
-                WHERE enunciado = :enunciado AND idMissao = :idMissao";
+        try {
+            $sql = "SELECT COUNT(*) FROM questao 
+                    WHERE enunciado = :enunciado AND idMissao = :idMissao";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':enunciado', $enunciado);
-        $stmt->bindValue(':idMissao', $idMissao);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':enunciado', $enunciado);
+            $stmt->bindValue(':idMissao', $idMissao);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se questão existe: " . $e->getMessage());
+        }
     }
 
     public function verificarSeMensagemExiste(string $mensagem): bool
     {
-        $sql = "SELECT COUNT(*) FROM questao WHERE mensagemCorrecao = :msg";
+        try {
+            $sql = "SELECT COUNT(*) FROM questao WHERE mensagemCorrecao = :msg";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':msg', $mensagem);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':msg', $mensagem);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se mensagem existe: " . $e->getMessage());
+        }
     }
 
     public function verificarSeQuestaoExisteParaOutraMissao(int $idQuestao, int $idMissao): bool
     {
-        $sql = "SELECT COUNT(*) FROM questao WHERE IdQuestao = :idQuestao AND IdMissao != :idMissao";
+        try {
+            $sql = "SELECT COUNT(*) FROM questao WHERE IdQuestao = :idQuestao AND IdMissao != :idMissao";
 
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':idQuestao', $idQuestao);
-        $stmt->bindValue(':idMissao', $idMissao);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':idQuestao', $idQuestao);
+            $stmt->bindValue(':idMissao', $idMissao);
+            $stmt->execute();
 
-        return $stmt->fetchColumn() > 0;
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar se questão existe para outra missão: " . $e->getMessage());
+        }
     }
 }

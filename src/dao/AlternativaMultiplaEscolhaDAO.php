@@ -14,16 +14,16 @@ class AlternativaMultiplaEscolhaDAO
     public function salvar(int $idAlternativa, AlternativaMultiplaEscolha $alternativa): void
     {
         try {
-            $sql = "INSERT INTO ALTERNATIVA_MULTIPLA_ESCOLHA (IdAlternativa, TipoMultiplaEscolha, Correta)
+            $sql = "INSERT INTO alternativa_multipla_escolha (IdAlternativa, TipoMultiplaEscolha, Correta)
                     VALUES (:idAlternativa, :tipoMultiplaEscolha, :correta)";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idAlternativa", $idAlternativa, PDO::PARAM_INT);
             $stmt->bindValue(":tipoMultiplaEscolha", $alternativa->getTipoMultiplaEscolha(), PDO::PARAM_STR);
-            $stmt->bindValue(":correta", $alternativa->isCorreta(), PDO::PARAM_BOOL); // Certifique-se de que o método existe na Entidade
+            $stmt->bindValue(":correta", $alternativa->isCorreta(), PDO::PARAM_BOOL);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao salvar alternativa do tipo múltipla escolha!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao salvar alternativa do tipo múltipla escolha: " . $e->getMessage());
         }
     }
 
@@ -36,7 +36,7 @@ class AlternativaMultiplaEscolhaDAO
                         am.Correta,
                         a.IdQuestao,
                         am.TipoMultiplaEscolha
-                    FROM ALTERNATIVA_MULTIPLA_ESCOLHA AS am
+                    FROM alternativa_multipla_escolha AS am
                     INNER JOIN alternativa AS a ON a.IdAlternativa = am.IdAlternativa";
 
             $stmt = $this->conexao->prepare($sql);
@@ -50,8 +50,8 @@ class AlternativaMultiplaEscolhaDAO
             }
 
             return $alternativas;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar alternativas do tipo múltipla escolha!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar alternativas do tipo múltipla escolha: " . $e->getMessage());
         }
     }
 
@@ -64,7 +64,7 @@ class AlternativaMultiplaEscolhaDAO
                         am.Correta,
                         a.IdQuestao,
                         am.TipoMultiplaEscolha
-                    FROM ALTERNATIVA_MULTIPLA_ESCOLHA AS am
+                    FROM alternativa_multipla_escolha AS am
                     INNER JOIN alternativa AS a ON a.IdAlternativa = am.IdAlternativa
                     WHERE a.IdQuestao = :idQuestao";
 
@@ -80,8 +80,8 @@ class AlternativaMultiplaEscolhaDAO
             }
 
             return $alternativas;
-        } catch (PDOException) {
-            throw new Exception("Erro ao listar alternativas de múltipla escolha para a questão especificada!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao listar alternativas de múltipla escolha para a questão especificada: " . $e->getMessage());
         }
     }
 
@@ -94,7 +94,7 @@ class AlternativaMultiplaEscolhaDAO
                         am.Correta,
                         a.IdQuestao,
                         am.TipoMultiplaEscolha
-                    FROM ALTERNATIVA_MULTIPLA_ESCOLHA AS am
+                    FROM alternativa_multipla_escolha AS am
                     INNER JOIN alternativa AS a ON a.IdAlternativa = am.IdAlternativa
                     WHERE am.IdAlternativa = :idAlternativa";
 
@@ -109,15 +109,15 @@ class AlternativaMultiplaEscolhaDAO
             }
 
             return $this->mapearAlternativaMultiplaEscolha($registro);
-        } catch (PDOException) {
-            throw new Exception("Erro ao encontrar alternativa do tipo múltipla escolha especificada!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao encontrar alternativa do tipo múltipla escolha especificada: " . $e->getMessage());
         }
     }
 
     public function atualizar(AlternativaMultiplaEscolha $alternativa): void
     {
         try {
-            $sql = "UPDATE ALTERNATIVA_MULTIPLA_ESCOLHA 
+            $sql = "UPDATE alternativa_multipla_escolha 
                     SET TipoMultiplaEscolha = :tipoMultiplaEscolha,
                         Correta = :correta
                     WHERE IdAlternativa = :idAlternativa";
@@ -127,8 +127,8 @@ class AlternativaMultiplaEscolhaDAO
             $stmt->bindValue(":correta", $alternativa->isCorreta(), PDO::PARAM_BOOL);
             $stmt->bindValue(":idAlternativa", $alternativa->getIdAlternativa(), PDO::PARAM_INT);
             $stmt->execute();
-        } catch (PDOException) {
-            throw new Exception("Erro ao atualizar alternativa do tipo múltipla escolha!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao atualizar alternativa do tipo múltipla escolha: " . $e->getMessage());
         }
     }
 

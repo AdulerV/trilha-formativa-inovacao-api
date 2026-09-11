@@ -122,8 +122,8 @@ class AlternativaDAO
                 Alternativa::TIPO_MULTIPLA_ESCOLHA => $this->multiplaEscolhaDAO->buscarPorId($idAlternativa),
                 default => throw new Exception("Tipo de alternativa desconhecido no banco de dados!")
             };
-        } catch (PDOException) {
-            throw new Exception("Erro ao buscar alternativa指定!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao buscar alternativa especificada: " . $e->getMessage());
         }
     }
 
@@ -140,7 +140,7 @@ class AlternativaDAO
     {
         try {
             $sql = "SELECT TipoAlternativa
-                FROM ALTERNATIVA
+                FROM alternativa
                 WHERE IdQuestao = :idQuestao
                 LIMIT 1";
 
@@ -249,8 +249,8 @@ class AlternativaDAO
             $stmt->execute();
 
             return $stmt->fetchColumn() > 0;
-        } catch (PDOException) {
-            throw new Exception("Erro ao verificar a existencia da alternativa!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar a existencia da alternativa: " . $e->getMessage());
         }
     }
 
@@ -264,8 +264,8 @@ class AlternativaDAO
             $stmt->execute();
 
             return $stmt->fetchColumn() > 0;
-        } catch (PDOException) {
-            throw new Exception("Erro ao verificar duplicidade de texto da alternativa!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar duplicidade de texto da alternativa: " . $e->getMessage());
         }
     }
 
@@ -279,8 +279,8 @@ class AlternativaDAO
             $stmt->execute();
 
             return $stmt->fetchColumn() > 0;
-        } catch (PDOException) {
-            throw new Exception("Erro ao verificar mesmo tipo de alternativa!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar mesmo tipo de alternativa: " . $e->getMessage());
         }
     }
 
@@ -298,8 +298,8 @@ class AlternativaDAO
                 return $tipo === $tipoDemais;
             }
             return true;
-        } catch (PDOException) {
-            throw new Exception("Erro ao verificar mesmo tipo de alternativa!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar mesmo tipo de alternativa: " . $e->getMessage());
         }
     }
 
@@ -321,8 +321,8 @@ class AlternativaDAO
             $stmt->execute();
 
             return (int) $stmt->fetchColumn() > 0;
-        } catch (PDOException) {
-            throw new Exception("Erro ao verificar número de sequência!");
+        } catch (PDOException $e) {
+            throw new Exception("Erro ao verificar número de sequência: " . $e->getMessage());
         }
     }
 
@@ -352,9 +352,9 @@ class AlternativaDAO
             $stmt->execute();
 
             return (int)$stmt->fetchColumn() > 0;
-        } catch (PDOException) {
+        } catch (PDOException $e) {
             throw new Exception(
-                "Erro ao validar atualização de texto para outra alternativa!"
+                "Erro ao validar atualização de texto para outra alternativa: " . $e->getMessage()
             );
         }
     }
