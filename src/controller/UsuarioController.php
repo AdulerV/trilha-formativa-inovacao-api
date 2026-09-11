@@ -32,7 +32,7 @@ class UsuarioController
                 ]
             ];
 
-            $chaveSecreta = $_ENV['JWT_SECRET'] ?? '';
+            $chaveSecreta = $_ENV['JWT_SECRET'] ?? 'sua_chave_padrao_secreta_com_32_caracteres_ou_mais_123';
             $token = JWT::encode($payload, $chaveSecreta, "HS256");
 
             Response::json([
@@ -263,11 +263,11 @@ class UsuarioController
         }
     }
 
-    public function alterarPrimeiroAcesso(int $id): void 
+    public function alterarPrimeiroAcesso(int $id): void
     {
         try {
             $this->service->alterarPrimeiroAcesso($id);
-    
+
             Response::json([
                 "mensagem" => "Primeiro acesso atualizado com sucesso!"
             ]);
