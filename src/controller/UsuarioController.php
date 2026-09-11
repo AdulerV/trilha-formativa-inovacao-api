@@ -32,14 +32,19 @@ class UsuarioController
                 ]
             ];
 
-            $chaveSecreta = $_ENV['JWT_SECRET'] ?? 'sua_chave_padrao_secreta_com_32_caracteres_ou_mais_123';
+            // Se $_ENV['JWT_SECRET'] for nulo ou menor que 32 caracteres, usa a chave de contingência
+            $chaveSecreta = $_ENV['JWT_SECRET'] ?? 'minha_chave_de_seguranca_muito_segura_12345';
+            if (strlen($chaveSecreta) < 32) {
+                $chaveSecreta = 'minha_chave_de_seguranca_muito_segura_12345';
+            }
+
             $token = JWT::encode($payload, $chaveSecreta, "HS256");
 
             Response::json([
                 "idUsuario" => $usuario->getIdUsuario(),
                 "status" => "sucesso",
                 "token"  => $token,
-                "nomeAventureiro"     => $usuario->getNomeAventureiro(),
+                "nomeAventureiro" => $usuario->getNomeAventureiro(),
                 "admin"     => $usuario->isAdmin()
             ]);
         } catch (RegraDeNegocioException $e) {
@@ -53,7 +58,7 @@ class UsuarioController
                 $e->getLine()
             ));
 
-            Response::error($e->getMessage(), 500);
+            Response::error($e->getMessage(), 400);
         }
     }
 
