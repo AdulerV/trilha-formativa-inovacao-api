@@ -4,7 +4,20 @@ $usuarioDAO = new UsuarioDAO($pdo);
 
 $ocupacaoDAO = new OcupacaoDAO($pdo);
 
-$usuarioService = new UsuarioService($usuarioDAO, $ocupacaoDAO);
+/*
+ * O cadastro só aceita e-mails previamente verificados, então o
+ * UsuarioService precisa saber consumir o comprovante emitido em
+ * /api/v1/verificacao-email/confirmar.
+ */
+$usuarioService = new UsuarioService(
+    $usuarioDAO,
+    $ocupacaoDAO,
+    new VerificacaoEmailService(
+        new VerificacaoEmailDAO($pdo),
+        $usuarioDAO,
+        new EmailService()
+    )
+);
 
 $usuarioController = new UsuarioController($usuarioService);
 

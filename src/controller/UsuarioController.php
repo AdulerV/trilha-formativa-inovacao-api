@@ -135,7 +135,18 @@ class UsuarioController
                 $dados["senhaRepeticao"] ?? null
             );
 
-            $this->service->salvar(UsuarioDTO::create($dados, null));
+            /*
+             * Comprovante devolvido por
+             * POST /api/v1/verificacao-email/confirmar. Sem ele o
+             * cadastro não prossegue: é a prova de que o e-mail
+             * informado existe e pertence a quem está se cadastrando.
+             */
+            $this->service->salvar(
+                UsuarioDTO::create($dados, null),
+                isset($dados["comprovanteVerificacao"])
+                    ? (string) $dados["comprovanteVerificacao"]
+                    : null
+            );
 
             Response::json([
                 "mensagem" => "Usuario salvo com sucesso!"
