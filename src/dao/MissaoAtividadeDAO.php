@@ -177,7 +177,7 @@ class MissaoAtividadeDAO
         if (
             array_key_exists("IdDistintivo", $dados) &&
             !is_null($dados["IdDistintivo"]) &&
-            in_array($dados["TipoAtividade"], ["tarefa", "tarefa_final"])
+            in_array($dados["TipoAtividade"], ["tarefa", "tarefa final"])
         ) {
             return $this->tarefaDAO->mapearMissaoAtividadeTarefa($dados);
         }
