@@ -3,11 +3,23 @@ class UsuarioService
 {
     private UsuarioDAO $usuarioDAO;
     private OcupacaoDAO $ocupacaoDAO;
+    private ?VerificacaoEmailService $verificacaoEmailService;
 
-    public function __construct(UsuarioDAO $usuarioDAO, OcupacaoDAO $ocupacaoDAO)
-    {
+    /**
+     * O terceiro parâmetro é opcional apenas para que testes de
+     * unidade que não exercitam o cadastro possam montar o serviço com
+     * duas dependências. Em execução real ele SEMPRE é injetado
+     * (ver src/config/routes/usuario.php): sem ele, salvar() aceitaria
+     * qualquer e-mail sem verificação.
+     */
+    public function __construct(
+        UsuarioDAO $usuarioDAO,
+        OcupacaoDAO $ocupacaoDAO,
+        ?VerificacaoEmailService $verificacaoEmailService = null
+    ) {
         $this->usuarioDAO = $usuarioDAO;
         $this->ocupacaoDAO = $ocupacaoDAO;
+        $this->verificacaoEmailService = $verificacaoEmailService;
     }
 
     public function autenticar(string $email, string $senha): Usuario
@@ -36,9 +48,30 @@ class UsuarioService
         $this->usuarioDAO->atualizarFotoPerfil($idUsuario, $caminhoFoto);
     }
 
-    public function salvar(Usuario $usuario): void
+    /**
+     * Cria a conta, exigindo que o e-mail já tenha sido verificado.
+     *
+     * O comprovante é consumido ANTES do INSERT, e não depois, por um
+     * motivo de ordem: consumir depois deixaria a janela em que duas
+     * requisições simultâneas com o mesmo comprovante passariam pela
+     * verificação e criariam duas contas. Consumindo antes, o UPDATE
+     * condicional do DAO garante que apenas uma siga adiante.
+     *
+     * O custo dessa ordem é que uma falha no INSERT queima o
+     * comprovante e obriga o usuário a pedir um código novo. É o lado
+     * seguro para errar.
+     */
+    public function salvar(Usuario $usuario, ?string $comprovanteVerificacao = null): void
     {
         $this->validarCriacao($usuario);
+
+        if ($this->verificacaoEmailService !== null) {
+            $this->verificacaoEmailService->consumirComprovante(
+                $usuario->getCorreioEletronico(),
+                $comprovanteVerificacao
+            );
+        }
+
         $this->usuarioDAO->salvar($usuario);
     }
 

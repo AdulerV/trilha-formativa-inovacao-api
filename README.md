@@ -435,6 +435,134 @@ mysql -u root -p mydb < src/config/sql/migrations/001_recuperacao_senha.sql
 
 ---
 
+## Verificação de e-mail no cadastro
+
+Antes de criar uma conta, a API confirma que o endereço informado existe e pertence a quem está preenchendo o formulário. A confirmação é feita por um **código de seis dígitos** enviado por e-mail.
+
+### Como funciona
+
+1. O usuário preenche o formulário de cadastro e o frontend envia apenas o e-mail.
+2. A API gera um código de seis dígitos, grava o resumo SHA-256 e envia o código por e-mail.
+3. O usuário digita o código recebido.
+4. Conferido o código, a API devolve um **comprovante de 256 bits**.
+5. O frontend envia esse comprovante junto com o `POST /usuarios`. Sem ele, o cadastro é recusado.
+
+A conta só nasce no passo 5, já com o e-mail validado. Nenhum registro de usuário é criado antes disso.
+
+### Endpoints
+
+| Método | Rota | Autenticação | Descrição |
+| --- | --- | --- | --- |
+| `POST` | `/api/v1/verificacao-email/solicitar` | Pública | Envia o código de seis dígitos |
+| `POST` | `/api/v1/verificacao-email/confirmar` | Pública | Confere o código e devolve o comprovante |
+
+**Solicitar**
+
+```http
+POST /api/v1/verificacao-email/solicitar
+Content-Type: application/json
+
+{
+  "correioEletronico": "novo.aventureiro@exemplo.com"
+}
+```
+
+```json
+{
+  "mensagem": "Código de verificação enviado para o e-mail informado.",
+  "expiraEmMinutos": 15
+}
+```
+
+E-mail já cadastrado retorna `400` com `"Este e-mail já está cadastrado."`. Diferente da recuperação de senha, aqui a duplicidade é revelada de propósito: o `POST /usuarios` já recusa e-mail repetido com `"Email já utilizado!"`, então esconder a informação neste endpoint não protegeria segredo nenhum e deixaria o usuário sem saber por que o cadastro não avança.
+
+**Confirmar**
+
+```http
+POST /api/v1/verificacao-email/confirmar
+Content-Type: application/json
+
+{
+  "correioEletronico": "novo.aventureiro@exemplo.com",
+  "codigo": "418302"
+}
+```
+
+```json
+{
+  "mensagem": "E-mail verificado com sucesso!",
+  "comprovanteVerificacao": "1f4c...9ab2",
+  "expiraEmMinutos": 30
+}
+```
+
+Qualquer falha (código errado, expirado, tentativas esgotadas) retorna `400` com a mesma mensagem: `"Código de verificação inválido ou expirado."`.
+
+**Cadastro com o comprovante**
+
+```http
+POST /api/v1/usuarios
+Content-Type: application/json
+
+{
+  "nomeUsuario": "João Silva",
+  "nomeAventureiro": "joaogamer",
+  "correioEletronico": "novo.aventureiro@exemplo.com",
+  "idOcupacao": 1,
+  "senha": "SenhaForte@2026",
+  "senhaRepeticao": "SenhaForte@2026",
+  "comprovanteVerificacao": "1f4c...9ab2"
+}
+```
+
+O comprovante precisa pertencer ao mesmo e-mail do cadastro, estar dentro do prazo e ainda não ter sido usado. Caso contrário, a resposta é `400` com `"Verificação de e-mail ausente ou expirada. Solicite um novo código."`.
+
+### Por que um código de seis dígitos exige cuidados extras
+
+Um código de seis dígitos tem apenas 10<sup>6</sup> combinações. Comparado ao token de 256 bits da recuperação de senha, é um segredo fraco: sem proteção, um atacante que conhece o e-mail alvo acerta por força bruta em poucos minutos de requisições.
+
+São três controles que tornam o número curto aceitável, e nenhum é dispensável:
+
+| Controle | Variável | Padrão | Papel |
+| --- | --- | --- | --- |
+| Limite de tentativas | `EMAIL_VERIFICATION_MAX_ATTEMPTS` | 5 | Queima o código após N erros, reduzindo a chance de acerto a N/10<sup>6</sup> |
+| Prazo de validade | `EMAIL_VERIFICATION_TTL_MINUTES` | 15 | Fecha a janela de ataque |
+| Teto de emissões | `EMAIL_VERIFICATION_MAX_REQUESTS` | 3 | Impede renovar o código para recuperar tentativas |
+
+O contador de tentativas é incrementado no banco (`Tentativas = Tentativas + 1`) e não em PHP, para que requisições paralelas não se sobrescrevam — caso contrário o limite seria contornável disparando tudo de uma vez.
+
+Confirmado o código, o segredo fraco sai de cena: o comprovante que autoriza o cadastro tem 256 bits, gerado por `random_bytes(32)`.
+
+> **Nota sobre o resumo do código.** O `HashCodigo` protege contra exposição casual (dump, log, backup), não contra um atacante com o banco em mãos: com 10<sup>6</sup> combinações, o SHA-256 é revertido por força bruta em segundos. A defesa real é o limite de tentativas. Para endurecer, troque por `hash_hmac` com um segredo de aplicação, que impede a força bruta offline.
+
+### Demais controles
+
+| Controle | Implementação |
+| --- | --- |
+| Geração do código | `random_int`, gerador criptográfico. `rand()` e `mt_rand()` seriam previsíveis a partir de algumas amostras |
+| Zero à esquerda | Preservado com `str_pad`: `"007321"` é válido e tratá-lo como inteiro quebraria a conferência |
+| Comparação | `hash_equals`, em tempo constante, contra ataque de temporização |
+| Confirmação única | `UPDATE ... WHERE DataVerificacao IS NULL`, atômico sob concorrência |
+| Consumo único | `UPDATE ... WHERE DataConsumo IS NULL`, impede duas contas com o mesmo comprovante |
+| Vínculo com o e-mail | O comprovante só vale para o endereço que foi verificado |
+| Códigos anteriores | Invalidados a cada nova solicitação |
+
+### Ordem de consumo no cadastro
+
+O comprovante é consumido **antes** do `INSERT` do usuário, e não depois. Consumir depois deixaria a janela em que duas requisições simultâneas com o mesmo comprovante passariam pela verificação e criariam duas contas. O custo dessa ordem é que uma falha no `INSERT` queima o comprovante e obriga o usuário a pedir um código novo — é o lado seguro para errar.
+
+### Migração do banco
+
+A tabela `VERIFICACAO_EMAIL` já consta do `database.sql`. Em uma base existente, aplique apenas a migração:
+
+```bash
+mysql -u root -p mydb < src/config/sql/migrations/002_verificacao_email.sql
+```
+
+A tabela **não** tem chave estrangeira para `USUARIO`, e isso é proposital: no momento da verificação o usuário ainda não existe. O vínculo é o próprio endereço de e-mail.
+
+---
+
 ## Estrutura do projeto
 
 A API está organizada em diferentes camadas, buscando separar as responsabilidades relacionadas à configuração, comunicação HTTP, regras de negócio, persistência de dados, segurança e tratamento de exceções.

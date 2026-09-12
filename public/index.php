@@ -23,6 +23,7 @@ require_once __DIR__ . '/../src/config/routes/questao.php';
 require_once __DIR__ . '/../src/config/routes/tematica.php';
 require_once __DIR__ . '/../src/config/routes/usuario.php';
 require_once __DIR__ . '/../src/config/routes/recuperacaoSenha.php';
+require_once __DIR__ . '/../src/config/routes/verificacaoEmail.php';
 
 $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 

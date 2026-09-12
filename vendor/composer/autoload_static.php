@@ -1174,6 +1174,10 @@ class ComposerStaticInitb487a3d83015456f309062689f14275f
         'UsuarioDTO' => __DIR__ . '/../..' . '/src/dto/UsuarioDTO.php',
         'UsuarioService' => __DIR__ . '/../..' . '/src/service/UsuarioService.php',
         'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
+        'VerificacaoEmail' => __DIR__ . '/../..' . '/src/model/VerificacaoEmail.php',
+        'VerificacaoEmailController' => __DIR__ . '/../..' . '/src/controller/VerificacaoEmailController.php',
+        'VerificacaoEmailDAO' => __DIR__ . '/../..' . '/src/dao/VerificacaoEmailDAO.php',
+        'VerificacaoEmailService' => __DIR__ . '/../..' . '/src/service/VerificacaoEmailService.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

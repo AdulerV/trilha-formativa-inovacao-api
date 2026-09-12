@@ -1089,4 +1089,8 @@ return array(
     'UsuarioDTO' => $baseDir . '/src/dto/UsuarioDTO.php',
     'UsuarioService' => $baseDir . '/src/service/UsuarioService.php',
     'ValueError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
+    'VerificacaoEmail' => $baseDir . '/src/model/VerificacaoEmail.php',
+    'VerificacaoEmailController' => $baseDir . '/src/controller/VerificacaoEmailController.php',
+    'VerificacaoEmailDAO' => $baseDir . '/src/dao/VerificacaoEmailDAO.php',
+    'VerificacaoEmailService' => $baseDir . '/src/service/VerificacaoEmailService.php',
 );
