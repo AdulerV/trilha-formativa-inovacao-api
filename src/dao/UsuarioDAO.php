@@ -127,7 +127,7 @@ class UsuarioDAO
             o.Titulo
             FROM usuario AS u 
             INNER JOIN ocupacao AS o 
-            ON u.IdOcupacao = o.IdOcupacao AND u.Admin <> 1";
+            ON u.IdOcupacao = o.IdOcupacao";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
