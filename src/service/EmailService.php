@@ -268,6 +268,200 @@ HTML;
     }
 
     /**
+     * Envia o código de verificação de e-mail usado no cadastro.
+     *
+     * Recebe o endereço em vez de um objeto Usuario porque, neste
+     * ponto do fluxo, a conta ainda não existe: é justamente disso que
+     * se trata a verificação.
+     *
+     * O código aparece grande e espaçado no corpo da mensagem porque
+     * será digitado à mão — e a fonte monoespaçada evita a confusão
+     * clássica entre 0 e O, 1 e l.
+     */
+    public function enviarCodigoVerificacao(
+        string $destinatario,
+        string $codigo,
+        int $minutosDeValidade
+    ): void {
+        $codigoSeguro = htmlspecialchars(
+            $codigo,
+            ENT_QUOTES,
+            "UTF-8"
+        );
+
+        $nomeAplicacao = htmlspecialchars(
+            $this->nomeAplicacao,
+            ENT_QUOTES,
+            "UTF-8"
+        );
+
+        $corpoHtml = <<<HTML
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de e-mail</title>
+</head>
+
+<body style="
+    margin: 0;
+    padding: 0;
+    background-color: #f1f4d7;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #281d15;
+">
+
+    <div style="
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e6c5;
+    ">
+
+        <!-- Cabeçalho -->
+        <div style="
+            background-color: #154c21;
+            padding: 28px 32px;
+            text-align: center;
+        ">
+            <h1 style="
+                margin: 0;
+                color: #ffffff;
+                font-size: 24px;
+                font-weight: 600;
+            ">
+                {$nomeAplicacao}
+            </h1>
+        </div>
+
+        <!-- Conteúdo -->
+        <div style="
+            padding: 36px 40px;
+        ">
+
+            <p style="
+                margin: 0 0 20px;
+                font-size: 16px;
+                line-height: 1.6;
+                color: #281d15;
+            ">
+                Olá, futuro aventureiro!
+            </p>
+
+            <p style="
+                margin: 0 0 28px;
+                font-size: 15px;
+                line-height: 1.6;
+                color: #281d15;
+            ">
+                Para concluir seu cadastro na plataforma
+                <strong>{$nomeAplicacao}</strong>, confirme este
+                endereço de e-mail informando o código abaixo:
+            </p>
+
+            <!-- Código -->
+            <div style="
+                text-align: center;
+                margin: 0 0 30px;
+            ">
+                <div style="
+                    display: inline-block;
+                    padding: 18px 34px;
+                    background-color: #f1f4d7;
+                    border: 2px dashed #2f9e41;
+                    border-radius: 10px;
+                ">
+                    <span style="
+                        font-family: 'Courier New', Courier, monospace;
+                        font-size: 34px;
+                        font-weight: bold;
+                        letter-spacing: 10px;
+                        color: #154c21;
+                    ">
+                        {$codigoSeguro}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Validade -->
+            <div style="
+                padding: 16px 18px;
+                background-color: #f1f4d7;
+                border-left: 4px solid #2f9e41;
+                border-radius: 6px;
+            ">
+                <p style="
+                    margin: 0;
+                    font-size: 13px;
+                    line-height: 1.6;
+                    color: #154c21;
+                ">
+                    <strong>Validade do código</strong><br>
+                    Por segurança, este código expira em
+                    <strong>{$minutosDeValidade} minutos</strong> e só
+                    pode ser usado uma vez.
+                </p>
+            </div>
+
+            <p style="
+                margin: 24px 0 0;
+                font-size: 13px;
+                line-height: 1.6;
+                color: #281d15;
+            ">
+                Se você não tentou criar uma conta na plataforma, pode
+                ignorar este e-mail. Nenhum cadastro será feito sem que
+                o código acima seja informado.
+            </p>
+
+        </div>
+
+        <!-- Rodapé -->
+        <div style="
+            padding: 20px 32px;
+            background-color: #154c21;
+            text-align: center;
+        ">
+            <p style="
+                margin: 0;
+                font-size: 12px;
+                line-height: 1.5;
+                color: #ffffff;
+            ">
+                Este é um e-mail automático.
+                Por favor, não responda a esta mensagem.
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>
+HTML;
+
+        $corpoTexto = "Olá, futuro aventureiro!\n\n"
+            . "Para concluir seu cadastro na plataforma {$this->nomeAplicacao}, "
+            . "confirme este endereço de e-mail informando o código abaixo:\n\n"
+            . "    {$codigo}\n\n"
+            . "O código expira em {$minutosDeValidade} minutos e só pode "
+            . "ser usado uma vez.\n\n"
+            . "Se você não tentou criar uma conta na plataforma, pode ignorar "
+            . "este e-mail. Nenhum cadastro será feito sem que o código acima "
+            . "seja informado.";
+
+        $this->enviar(
+            $destinatario,
+            $destinatario,
+            "Confirme seu e-mail - {$this->nomeAplicacao}",
+            $corpoHtml,
+            $corpoTexto
+        );
+    }
+
+    /**
      * Avisa o usuário de que a senha foi alterada.
      *
      * Recomendação do OWASP: a confirmação permite que a vítima de um

@@ -78,6 +78,28 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `mydb`.`VERIFICACAO_EMAIL`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`VERIFICACAO_EMAIL` (
+  `IdVerificacaoEmail` INT NOT NULL AUTO_INCREMENT,
+  `CorreioEletronico` VARCHAR(320) NOT NULL,
+  `HashCodigo` CHAR(64) NOT NULL,
+  `HashComprovante` CHAR(64) NULL DEFAULT NULL,
+  `Tentativas` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `DataCriacao` DATETIME NOT NULL,
+  `DataExpiracao` DATETIME NOT NULL,
+  `DataVerificacao` DATETIME NULL DEFAULT NULL,
+  `DataExpiracaoComprovante` DATETIME NULL DEFAULT NULL,
+  `DataConsumo` DATETIME NULL DEFAULT NULL,
+  `EnderecoIp` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`IdVerificacaoEmail`),
+  UNIQUE INDEX `VerificacaoEmail_Comprovante_UNIQUE` (`HashComprovante` ASC),
+  INDEX `VerificacaoEmail_Correio_idx` (`CorreioEletronico` ASC),
+  INDEX `VerificacaoEmail_Expiracao_idx` (`DataExpiracao` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `mydb`.`TEMATICA`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`TEMATICA` (
