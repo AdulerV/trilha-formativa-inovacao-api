@@ -6,8 +6,8 @@ class Conexao
     {
         return new PDO(
             "mysql:host=127.0.0.1;port=3307;dbname=mydb;charset=utf8mb4",
-            "root",
-            "",
+            "sisgame_user",
+            "user#sisgame#mysql",
             [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
             ]
