@@ -1,2 +1,4 @@
 .env
 .env.example
+src/config/Conexao.php
+src/config/CorsMiddleware.php
