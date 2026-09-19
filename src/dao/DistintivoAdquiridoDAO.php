@@ -61,7 +61,8 @@ class DistintivoAdquiridoDAO
             ON da.IdDistintivo = d.IdDistintivo
 
             WHERE da.IdUsuario = :idUsuario
-            AND da.IdDistintivo = :idDistintivo";
+            AND da.IdDistintivo = :idDistintivo
+            AND u.Admin != 1";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idUsuario", $idUsuario);
@@ -108,7 +109,9 @@ class DistintivoAdquiridoDAO
             ON u.IdOcupacao = o.IdOcupacao
 
             INNER JOIN distintivo d
-            ON da.IdDistintivo = d.IdDistintivo";
+            ON da.IdDistintivo = d.IdDistintivo
+            
+            WHERE u.Admin != 1";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
@@ -160,7 +163,8 @@ class DistintivoAdquiridoDAO
             INNER JOIN distintivo d
             ON da.IdDistintivo = d.IdDistintivo
 
-            WHERE da.IdUsuario = :idUsuario";
+            WHERE da.IdUsuario = :idUsuario
+            AND u.Admin != 1";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idUsuario", $idUsuario);

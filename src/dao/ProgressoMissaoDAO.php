@@ -85,6 +85,8 @@ class ProgressoMissaoDAO
     {
         try {
             $sql = $this->getSqlBase();
+            $sql .= " AND u.Admin != 1";
+            
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
 
@@ -105,9 +107,11 @@ class ProgressoMissaoDAO
     {
         try {
             $sql = $this->getSqlBase() . " WHERE p.IdUsuario = :idUsuario";
+            $sql .= " AND u.Admin != 1";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idUsuario", $idUsuario);
+            
             $stmt->execute();
 
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
