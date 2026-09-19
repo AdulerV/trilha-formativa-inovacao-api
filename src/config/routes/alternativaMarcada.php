@@ -14,9 +14,11 @@ $alternativaMarcadaService = new AlternativaMarcadaService($alternativaMarcadaDA
 
 $alternativaMarcadaController = new AlternativaMarcadaController($alternativaMarcadaService);
 
-$router->add("GET", "/api/v1/alternativas-marcadas", [$alternativaMarcadaController, "listar"]);
-$router->add("GET", "/api/v1/usuarios/{idUsuario}/alternativas-marcadas", [$alternativaMarcadaController, "listarPorUsuario"]);
-$router->add("GET", "/api/v1/usuarios/{idUsuario}/alternativas/{idAlternativa}", [$alternativaMarcadaController, "buscarPorId"]);
-$router->add("POST", "/api/v1/usuarios/alternativas-marcadas", [$alternativaMarcadaController, "salvar"]);
-$router->add("PUT", "/api/v1/usuarios/{idUsuario}/alternativas/{idAlternativa}", [$alternativaMarcadaController, "atualizar"]);
-$router->add("DELETE", "/api/v1/usuarios/{idUsuario}/alternativas/{idAlternativa}", [$alternativaMarcadaController, "deletar"]);
+$auth = [[JwtMiddleware::class, 'verificar']];
+
+//$router->add("GET", "/api/v1/alternativas-marcadas", [$alternativaMarcadaController, "listar"], $auth);
+//$router->add("GET", "/api/v1/usuarios/{idUsuario}/alternativas-marcadas", [$alternativaMarcadaController, "listarPorUsuario"], $auth);
+//$router->add("GET", "/api/v1/usuarios/{idUsuario}/alternativas/{idAlternativa}", [$alternativaMarcadaController, "buscarPorId"], $auth);
+$router->add("POST", "/api/v1/usuarios/alternativas-marcadas", [$alternativaMarcadaController, "salvar"], $auth);
+$router->add("PUT", "/api/v1/usuarios/{idUsuario}/alternativas/{idAlternativa}", [$alternativaMarcadaController, "atualizar"], $auth);
+$router->add("DELETE", "/api/v1/usuarios/{idUsuario}/alternativas/{idAlternativa}", [$alternativaMarcadaController, "deletar"], $auth);

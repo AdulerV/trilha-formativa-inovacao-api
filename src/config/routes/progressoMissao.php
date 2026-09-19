@@ -42,9 +42,11 @@ $missaoService = new MissaoService($missaoDAO, $questaoService);
 
 $progressoController = new ProgressoMissaoController($progressoService, $usuarioService, $missaoService);
 
-$router->add("GET", "/api/v1/progresso-missao", [$progressoController, "listar"]);
-$router->add("GET", "/api/v1/usuarios/{idUsuario}/missoes", [$progressoController, "listarPorUsuario"]);
-$router->add("GET", "/api/v1/usuarios/{idUsuario}/missoes/{idMissao}", [$progressoController, "buscarPorId"]);
-$router->add("POST", "/api/v1/usuarios/missoes", [$progressoController, "salvar"]);
-$router->add("PUT", "/api/v1/usuarios/{idUsuario}/missoes/{idMissao}", [$progressoController, "atualizar"]);
-$router->add("DELETE", "/api/v1/usuarios/{idUsuario}/missoes/{idMissao}", [$progressoController, "deletar"]);
+$auth = [[JwtMiddleware::class, 'verificar']];
+
+$router->add("GET", "/api/v1/progresso-missao", [$progressoController, "listar"], $auth);
+$router->add("GET", "/api/v1/usuarios/{idUsuario}/missoes", [$progressoController, "listarPorUsuario"], $auth);
+//$router->add("GET", "/api/v1/usuarios/{idUsuario}/missoes/{idMissao}", [$progressoController, "buscarPorId"], $auth);
+$router->add("POST", "/api/v1/usuarios/missoes", [$progressoController, "salvar"], $auth);
+$router->add("PUT", "/api/v1/usuarios/{idUsuario}/missoes/{idMissao}", [$progressoController, "atualizar"], $auth);
+$router->add("DELETE", "/api/v1/usuarios/{idUsuario}/missoes/{idMissao}", [$progressoController, "deletar"], $auth);

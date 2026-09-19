@@ -28,9 +28,14 @@ $missaoService = new MissaoService($missaoDAO, $questaoService);
 
 $questaoController = new QuestaoController($questaoService, $missaoService);
 
-$router->add("GET", "/api/v1/questoes", [$questaoController, "listar"]);
-$router->add("GET", "/api/v1/missoes/{idMissao}/questoes", [$questaoController, "listarPorMissao"]);
-$router->add("GET", "/api/v1/missoes/{idMissao}/questoes/{idQuestao}", [$questaoController, "buscarPorId"]);
-$router->add("POST", "/api/v1/missoes/{idMissao}/questoes", [$questaoController, "salvar"]);
-$router->add("PUT", "/api/v1/missoes/{idMissao}/questoes/{idQuestao}", [$questaoController, "atualizar"]);
-$router->add("DELETE", "/api/v1/missoes/{idMissao}/questoes/{idQuestao}", [$questaoController, "deletar"]);
+$adminAuth = [
+    [JwtMiddleware::class, 'verificar'],
+    [AdminMiddleware::class, 'verificar']
+];
+
+$router->add("GET", "/api/v1/questoes", [$questaoController, "listar"], $adminAuth);
+//$router->add("GET", "/api/v1/missoes/{idMissao}/questoes", [$questaoController, "listarPorMissao"], $adminAuth);
+$router->add("GET", "/api/v1/missoes/{idMissao}/questoes/{idQuestao}", [$questaoController, "buscarPorId"], $adminAuth);
+$router->add("POST", "/api/v1/missoes/{idMissao}/questoes", [$questaoController, "salvar"], $adminAuth);
+$router->add("PUT", "/api/v1/missoes/{idMissao}/questoes/{idQuestao}", [$questaoController, "atualizar"], $adminAuth);
+$router->add("DELETE", "/api/v1/missoes/{idMissao}/questoes/{idQuestao}", [$questaoController, "deletar"], $adminAuth);

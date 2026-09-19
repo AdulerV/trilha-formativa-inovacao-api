@@ -6,8 +6,10 @@ $distintivoService = new DistintivoService($distintivoDAO);
 
 $distintivoController = new DistintivoController($distintivoService);
 
-$router->add("GET", "/api/v1/distintivos", [$distintivoController, "listar"]);
-$router->add("GET", "/api/v1/distintivos/{id}", [$distintivoController, "buscarPorId"]);
-$router->add("POST", "/api/v1/distintivos", [$distintivoController, "salvar"]);
-$router->add("PUT", "/api/v1/distintivos/{id}", [$distintivoController, "atualizar"]);
-$router->add("DELETE", "/api/v1/distintivos/{id}", [$distintivoController, "deletar"]);
+$auth = [[JwtMiddleware::class, 'verificar']];
+
+$router->add("GET", "/api/v1/distintivos", [$distintivoController, "listar"], $auth);
+$router->add("GET", "/api/v1/distintivos/{id}", [$distintivoController, "buscarPorId"], $auth);
+//$router->add("POST", "/api/v1/distintivos", [$distintivoController, "salvar"], $auth);
+//$router->add("PUT", "/api/v1/distintivos/{id}", [$distintivoController, "atualizar"], $auth);
+//$router->add("DELETE", "/api/v1/distintivos/{id}", [$distintivoController, "deletar"], $auth);

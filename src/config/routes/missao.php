@@ -28,8 +28,15 @@ $missaoService = new MissaoService($missaoDAO, $questaoService);
 
 $missaoController = new MissaoController($missaoService);
 
-$router->add("GET", "/api/v1/missoes", [$missaoController, "listar"]);
-$router->add("GET", "/api/v1/missoes/{idMissao}", [$missaoController, "buscarPorId"]);
-$router->add("POST", "/api/v1/missoes", [$missaoController, "salvar"]);
-$router->add("PUT", "/api/v1/missoes/{idMissao}", [$missaoController, "atualizar"]);
-$router->add("DELETE", "/api/v1/missoes/{idMissao}", [$missaoController, "deletar"]);
+$auth = [[JwtMiddleware::class, 'verificar']];
+
+$adminAuth = [
+    [JwtMiddleware::class, 'verificar'],
+    [AdminMiddleware::class, 'verificar']
+];
+
+$router->add("GET", "/api/v1/missoes", [$missaoController, "listar"], $auth);
+$router->add("GET", "/api/v1/missoes/{idMissao}", [$missaoController, "buscarPorId"], $auth);
+$router->add("POST", "/api/v1/missoes", [$missaoController, "salvar"], $adminAuth);
+$router->add("PUT", "/api/v1/missoes/{idMissao}", [$missaoController, "atualizar"], $adminAuth);
+$router->add("DELETE", "/api/v1/missoes/{idMissao}", [$missaoController, "deletar"], $adminAuth);

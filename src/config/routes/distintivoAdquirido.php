@@ -6,9 +6,11 @@ $distintivoAdquiridoService = new DistintivoAdquiridoService($distintivoAdquirid
 
 $distintivoAdquiridoController = new DistintivoAdquiridoController($distintivoAdquiridoService);
 
-$router->add("GET", "/api/v1/distintivo-adquirido", [$distintivoAdquiridoController, "listar"]);
-$router->add("GET", "/api/v1/usuarios/{idUsuario}/distintivos", [$distintivoAdquiridoController, "listarPorUsuario"]);
-$router->add("GET", "/api/v1/usuarios/{idUsuario}/distintivos/{idDistintivo}", [$distintivoAdquiridoController, "buscarPorId"]);
-$router->add("POST", "/api/v1/usuarios/distintivos", [$distintivoAdquiridoController, "salvar"]);
+$auth = [[JwtMiddleware::class, 'verificar']];
+
+//$router->add("GET", "/api/v1/distintivo-adquirido", [$distintivoAdquiridoController, "listar"], $auth);
+$router->add("GET", "/api/v1/usuarios/{idUsuario}/distintivos", [$distintivoAdquiridoController, "listarPorUsuario"], $auth);
+//$router->add("GET", "/api/v1/usuarios/{idUsuario}/distintivos/{idDistintivo}", [$distintivoAdquiridoController, "buscarPorId"], $auth);
+$router->add("POST", "/api/v1/usuarios/distintivos", [$distintivoAdquiridoController, "salvar"], $auth);
 /* $router->add("PUT", "/api/v1/usuarios/{idUsuario}/distintivos/{idDistintivo}", [$distintivoAdquiridoController, "atualizar"]); */
-$router->add("DELETE", "/api/v1/usuarios/{idUsuario}/distintivos/{idDistintivo}", [$distintivoAdquiridoController, "deletar"]);
+$router->add("DELETE", "/api/v1/usuarios/{idUsuario}/distintivos/{idDistintivo}", [$distintivoAdquiridoController, "deletar"], $auth);
