@@ -46,7 +46,18 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error($e->getMessage(), 400);
+            // Falha inesperada: o motivo fica no log, e a resposta
+            // leva uma mensagem genérica com 500.
+            //
+            // Devolver $e->getMessage() com 400 fazia duas coisas
+            // ruins de uma vez: expunha texto técnico (caminho de
+            // arquivo, erro de PDO) e disfarçava a falha de regra de
+            // negócio, já que o frontend usa a faixa 4xx para decidir
+            // se a mensagem da API pode ser mostrada ao usuário.
+            Response::error(
+                "Não foi possível concluir a operação. Tente novamente mais tarde.",
+                500
+            );
         }
     }
 
@@ -75,7 +86,18 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error($e->getMessage(), 400);
+            // Falha inesperada: o motivo fica no log, e a resposta
+            // leva uma mensagem genérica com 500.
+            //
+            // Devolver $e->getMessage() com 400 fazia duas coisas
+            // ruins de uma vez: expunha texto técnico (caminho de
+            // arquivo, erro de PDO) e disfarçava a falha de regra de
+            // negócio, já que o frontend usa a faixa 4xx para decidir
+            // se a mensagem da API pode ser mostrada ao usuário.
+            Response::error(
+                "Não foi possível concluir a operação. Tente novamente mais tarde.",
+                500
+            );
         }
     }
 
@@ -104,7 +126,18 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error($e->getMessage(), 400);
+            // Falha inesperada: o motivo fica no log, e a resposta
+            // leva uma mensagem genérica com 500.
+            //
+            // Devolver $e->getMessage() com 400 fazia duas coisas
+            // ruins de uma vez: expunha texto técnico (caminho de
+            // arquivo, erro de PDO) e disfarçava a falha de regra de
+            // negócio, já que o frontend usa a faixa 4xx para decidir
+            // se a mensagem da API pode ser mostrada ao usuário.
+            Response::error(
+                "Não foi possível concluir a operação. Tente novamente mais tarde.",
+                500
+            );
         }
     }
 
@@ -133,7 +166,18 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error($e->getMessage(), 400);
+            // Falha inesperada: o motivo fica no log, e a resposta
+            // leva uma mensagem genérica com 500.
+            //
+            // Devolver $e->getMessage() com 400 fazia duas coisas
+            // ruins de uma vez: expunha texto técnico (caminho de
+            // arquivo, erro de PDO) e disfarçava a falha de regra de
+            // negócio, já que o frontend usa a faixa 4xx para decidir
+            // se a mensagem da API pode ser mostrada ao usuário.
+            Response::error(
+                "Não foi possível concluir a operação. Tente novamente mais tarde.",
+                500
+            );
         }
     }
 
@@ -168,7 +212,18 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error($e->getMessage(), 400);
+            // Falha inesperada: o motivo fica no log, e a resposta
+            // leva uma mensagem genérica com 500.
+            //
+            // Devolver $e->getMessage() com 400 fazia duas coisas
+            // ruins de uma vez: expunha texto técnico (caminho de
+            // arquivo, erro de PDO) e disfarçava a falha de regra de
+            // negócio, já que o frontend usa a faixa 4xx para decidir
+            // se a mensagem da API pode ser mostrada ao usuário.
+            Response::error(
+                "Não foi possível concluir a operação. Tente novamente mais tarde.",
+                500
+            );
         }
     }
 
@@ -207,7 +262,18 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            Response::error($e->getMessage(), 400);
+            // Falha inesperada: o motivo fica no log, e a resposta
+            // leva uma mensagem genérica com 500.
+            //
+            // Devolver $e->getMessage() com 400 fazia duas coisas
+            // ruins de uma vez: expunha texto técnico (caminho de
+            // arquivo, erro de PDO) e disfarçava a falha de regra de
+            // negócio, já que o frontend usa a faixa 4xx para decidir
+            // se a mensagem da API pode ser mostrada ao usuário.
+            Response::error(
+                "Não foi possível concluir a operação. Tente novamente mais tarde.",
+                500
+            );
         }
     }
 }
