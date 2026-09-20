@@ -88,7 +88,7 @@ class ProgressoMissaoAtividade extends ProgressoMissao
             throw new DomainException("Pontuação inválida!");
         }
 
-        if ($pontuacaoObtida > $this->missao->getPontuacao()) {
+        if ($pontuacaoObtida > ($this->missao->getPontuacao() + 0.01)) {
             throw new DomainException("Pontuação maior que a permitida!");
         }
 
