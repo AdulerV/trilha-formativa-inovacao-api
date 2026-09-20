@@ -17,7 +17,7 @@ $alternativaMarcadaController = new AlternativaMarcadaController($alternativaMar
 $auth = [[JwtMiddleware::class, 'verificar']];
 
 //$router->add("GET", "/api/v1/alternativas-marcadas", [$alternativaMarcadaController, "listar"], $auth);
-//$router->add("GET", "/api/v1/usuarios/{idUsuario}/alternativas-marcadas", [$alternativaMarcadaController, "listarPorUsuario"], $auth);
+$router->add("GET", "/api/v1/usuarios/{idUsuario}/alternativas-marcadas", [$alternativaMarcadaController, "listarPorUsuario"], $auth);
 //$router->add("GET", "/api/v1/usuarios/{idUsuario}/alternativas/{idAlternativa}", [$alternativaMarcadaController, "buscarPorId"], $auth);
 $router->add("POST", "/api/v1/usuarios/alternativas-marcadas", [$alternativaMarcadaController, "salvar"], $auth);
 $router->add("PUT", "/api/v1/usuarios/{idUsuario}/alternativas/{idAlternativa}", [$alternativaMarcadaController, "atualizar"], $auth);
