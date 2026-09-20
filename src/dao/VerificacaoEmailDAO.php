@@ -51,11 +51,6 @@ class VerificacaoEmailDAO
 
     /**
      * Recupera a verificação em aberto mais recente de um e-mail.
-     *
-     * "Em aberto" significa ainda não confirmada e ainda não consumida.
-     * Só existe uma por e-mail em condições normais, porque emitir um
-     * código novo invalida os anteriores, mas a ordenação protege
-     * contra corridas.
      */
     public function buscarPendentePorEmail(string $correioEletronico): ?VerificacaoEmail
     {
@@ -187,10 +182,6 @@ class VerificacaoEmailDAO
         }
     }
 
-    /**
-     * Invalida tudo que estiver em aberto para um e-mail. Chamado antes
-     * de emitir um código novo, para que o anterior deixe de valer.
-     */
     public function invalidarPendentesPorEmail(string $correioEletronico): void
     {
         try {

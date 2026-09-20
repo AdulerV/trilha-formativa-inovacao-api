@@ -3,26 +3,8 @@
 declare(strict_types=1);
 
 /**
- * Regras da verificação de e-mail anterior ao cadastro.
- *
  * O fluxo espelha o da recuperação de senha, com uma diferença que
  * muda tudo: o segredo enviado tem seis dígitos, não 256 bits.
- *
- * Um código de seis dígitos tem 10^6 combinações. Sem proteção, um
- * atacante que conhece o e-mail alvo acerta por força bruta em poucos
- * minutos de requisições. São três controles que tornam o número
- * curto aceitável, e nenhum deles é dispensável:
- *
- *   1. limite de tentativas por código, que queima a verificação após
- *      N erros e reduz a chance de acerto a N/10^6;
- *   2. prazo de validade curto, que fecha a janela de ataque;
- *   3. limite de emissões por e-mail, que impede o atacante de
- *      renovar o código indefinidamente para recuperar tentativas.
- *
- * Confirmado o código, a API devolve um comprovante de 256 bits. É ele,
- * e não o código, que autoriza a criação da conta — assim o segredo
- * fraco vale por uma janela curta e o segredo forte atravessa o resto
- * do fluxo.
  */
 class VerificacaoEmailService
 {
@@ -167,9 +149,6 @@ class VerificacaoEmailService
         }
 
         if (!$verificacao->codigoConfere($codigo)) {
-            // A tentativa é contabilizada antes de responder: é este
-            // contador que transforma 10^6 possibilidades em um número
-            // de chances que cabe nos dedos.
             $this->verificacaoEmailDAO->registrarTentativa(
                 (int) $verificacao->getIdVerificacaoEmail()
             );

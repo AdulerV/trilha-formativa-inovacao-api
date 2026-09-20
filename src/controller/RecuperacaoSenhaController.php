@@ -61,12 +61,6 @@ class RecuperacaoSenhaController
                 "erro" => $e->getMessage()
             ], 400);
         } catch (Throwable $e) {
-            /*
-             * A mensagem genérica protege o usuário, mas o motivo
-             * precisa ficar registrado: era exatamente essa perda
-             * de informação que tornava o 500 impossível de
-             * diagnosticar.
-             */
             error_log(sprintf(
                 "[RecuperacaoSenha] %s: %s em %s:%d",
                 get_class($e),
@@ -75,14 +69,6 @@ class RecuperacaoSenhaController
                 $e->getLine()
             ));
 
-            // Falha inesperada: o motivo fica no log, e a resposta
-            // leva uma mensagem genérica com 500.
-            //
-            // Devolver $e->getMessage() com 400 fazia duas coisas
-            // ruins de uma vez: expunha texto técnico (caminho de
-            // arquivo, erro de PDO) e disfarçava a falha de regra de
-            // negócio, já que o frontend usa a faixa 4xx para decidir
-            // se a mensagem da API pode ser mostrada ao usuário.
             Response::error(
                 "Não foi possível concluir a operação. Tente novamente mais tarde.",
                 500
@@ -114,14 +100,6 @@ class RecuperacaoSenhaController
         } catch (Exception $e) {
             error_log("[recuperacao-senha] Erro na redefinição: " . $e->getMessage());
 
-            // Falha inesperada: o motivo fica no log, e a resposta
-            // leva uma mensagem genérica com 500.
-            //
-            // Devolver $e->getMessage() com 400 fazia duas coisas
-            // ruins de uma vez: expunha texto técnico (caminho de
-            // arquivo, erro de PDO) e disfarçava a falha de regra de
-            // negócio, já que o frontend usa a faixa 4xx para decidir
-            // se a mensagem da API pode ser mostrada ao usuário.
             Response::error(
                 "Não foi possível concluir a operação. Tente novamente mais tarde.",
                 500

@@ -6,19 +6,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Casamento de rotas.
- *
- * O defeito que estes testes travam: GET
- * /api/v1/usuarios/missoes derrubava a requisição com
- *
- *   TypeError: UsuarioController::buscarPorId(): Argument #1 ($id)
- *   must be of type int, string given
- *
- * O caminho só existe em POST. Como todo placeholder virava
- * ([^/]+), o segmento literal "missoes" era aceito no lugar de
- * {idUsuario} e repassado a um parâmetro tipado como int. O erro
- * escapava de qualquer try/catch do controller — TypeError é Error,
- * não Exception — e saía como fatal do PHP, com o caminho absoluto do
- * arquivo no corpo da resposta.
  */
 final class RoteamentoTest extends TestCase
 {

@@ -7,15 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Regressão do "somente a primeira resposta é salva".
- *
- * A chave primária de ALTERNATIVA_MARCADA é (IdUsuario, IdAlternativa).
- * O serviço recusava a segunda marcação da mesma alternativa com
- * "Esta alternativa já foi marcada por este usuário!", então refazer um
- * quiz ou uma tarefa não gravava nada — e o Promise.all do frontend
- * abortava a correção inteira no primeiro 400.
- *
- * Marcar de novo passou a substituir a resposta anterior; as regras de
- * tentativas e pontuação seguem na conclusão da missão.
  */
 class AlternativaMarcadaReenvioTest extends TestCase
 {

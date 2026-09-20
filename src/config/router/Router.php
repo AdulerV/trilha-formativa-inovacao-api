@@ -24,12 +24,6 @@ class Router
         string $method,
         string $uri
     ): void {
-        /*
-         * Métodos aceitos pelo caminho, quando ele existe mas com
-         * outro verbo. É o que permite responder 405 em vez de um
-         * 404 genérico — ou, pior, de deixar a URI cair em uma rota
-         * parametrizada vizinha.
-         */
         $metodosDoCaminho = [];
 
         foreach ($this->routes as $route) {
@@ -128,18 +122,6 @@ class Router
 
     /**
      * Transforma o caminho declarado na rota em expressão regular.
-     *
-     * Placeholders de identificador ({id}, {idUsuario}, {idMissao}…)
-     * passam a casar apenas dígitos.
-     *
-     * O padrão anterior era ([^/]+) para qualquer placeholder, e ele
-     * engolia segmentos literais: /api/v1/usuarios/missoes casava com
-     * /api/v1/usuarios/{idUsuario}, a string "missoes" era repassada
-     * a buscarPorId(int $id) e o PHP derrubava a requisição com
-     * TypeError antes de qualquer controller assumir.
-     *
-     * Placeholders com outros nomes continuam aceitando qualquer
-     * segmento, para não fechar a porta a rotas por slug.
      */
     private function compilar(string $path): string
     {

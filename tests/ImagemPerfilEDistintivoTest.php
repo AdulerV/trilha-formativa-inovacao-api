@@ -7,19 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Imagem de perfil (salvar/remover) e concessão de distintivo.
- *
- * Dois contratos travados aqui:
- *
- *  1. O caminho gravado no banco tem de ser o caminho pelo qual o
- *     servidor entrega o arquivo. Antes gravava-se "uploads/perfis/...",
- *     que não corresponde a nenhuma URL servida, e o frontend remontava
- *     a pasta por conta própria — quebrando quando o nome de aventureiro
- *     tinha acento, espaço ou maiúscula.
- *
- *  2. Conceder um distintivo que o usuário já possui não é erro. A
- *     verificação roda a cada conclusão de tarefa com 100%, então o
- *     caso é rotineiro; recusá-lo com 400 fazia a tela de conclusão
- *     acusar falha em uma operação correta.
  */
 class ImagemPerfilEDistintivoTest extends TestCase
 {

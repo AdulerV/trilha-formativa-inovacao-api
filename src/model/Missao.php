@@ -83,7 +83,6 @@ abstract class Missao
     {
         $tipoMissao = trim($tipoMissao);
 
-
         $this->tipoMissao = $tipoMissao;
         return $this;
     }

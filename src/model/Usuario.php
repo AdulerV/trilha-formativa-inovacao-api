@@ -9,12 +9,6 @@ class Usuario
     private string $nomeAventureiro;
     private string $correioEletronico;
 
-    /*
-     * Inicializadas para que uma entidade lida do banco sem hash de
-     * senha não estoure "must not be accessed before initialization"
-     * — Error, que não é Exception e por isso escapava dos catch dos
-     * controllers e virava 500 sem corpo JSON.
-     */
     private string $senha = "";
     private ?DateTime $dataNascimento = null;
     private ?bool $possuiConhecimento = null;
@@ -57,17 +51,6 @@ class Usuario
     /**
      * Reconstrói um usuário já persistido, sem repetir as validações
      * de criação.
-     *
-     * As regras dos setters existem para barrar dado ruim na ENTRADA.
-     * Aplicá-las de novo na LEITURA transforma qualquer registro
-     * antigo ou fora do padrão atual em erro 500 na listagem inteira:
-     * bastava um usuário cadastrado com nome de uma única palavra para
-     * derrubar GET /api/v1/progresso-missao, GET /api/v1/usuarios e o
-     * ranking junto com eles.
-     *
-     * Também evita o password_hash("Senha@123") que os DAOs faziam
-     * apenas para satisfazer setSenha(): eram ~180 ms de bcrypt por
-     * linha retornada, gastos para produzir um hash descartável.
      */
     public static function rehidratar(
         int $idUsuario,
@@ -229,9 +212,6 @@ class Usuario
 
     /**
      * Informa se a entidade carrega um hash de senha a ser gravado.
-     *
-     * O DAO usa isso para montar o UPDATE com ou sem a coluna
-     * HashSenha, em vez de sobrescrevê-la sempre.
      */
     public function temSenhaDefinida(): bool
     {

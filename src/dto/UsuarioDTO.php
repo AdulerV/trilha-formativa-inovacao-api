@@ -29,14 +29,6 @@ class UsuarioDTO
                 : null,
             (bool) ($dados["primeiroAcesso"] ?? false),
             false,
-            /*
-             * Na edição a senha é opcional. Antes o acesso era
-             * `$dados["senha"] ?? $dados["novaSenha"]`: sem nenhuma das
-             * duas chaves o PHP emitia aviso de índice indefinido e
-             * passava null a um parâmetro `string`, virando TypeError —
-             * que não é Exception e escapava dos catch do controller,
-             * derrubando a requisição com 500 sem corpo.
-             */
             self::extrairSenha($dados),
             new Ocupacao((int) $dados["idOcupacao"], "Qualquer")
         );

@@ -77,11 +77,6 @@ class Questao
         return $this->alternativas;
     }
 
-    /**
-     * Devolve a alternativa criada para que o chamador possa informar
-     * o ID gerado na resposta da API — sem isso o frontend precisava
-     * relistar tudo para descobrir o que acabou de salvar.
-     */
     public function adicionarAlternativa(
         string $texto,
         string $tipoAlternativa,
@@ -109,15 +104,6 @@ class Questao
                     );
 
                 if (is_array($associada)) {
-                    /*
-                     * A leitura devolve a associada com a chave "id"
-                     * (AlternativaDTO::toArray) e a escrita esperava
-                     * "idAlternativaAssociada". Quem reenviava para
-                     * edição o objeto recebido da API perdia o ID no
-                     * caminho, e a associação era recriada em vez de
-                     * atualizada. Aceitar as duas grafias resolve a
-                     * assimetria sem mudar o contrato de resposta.
-                     */
                     $idAssociada = $associada['idAlternativaAssociada']
                         ?? $associada['id']
                         ?? null;

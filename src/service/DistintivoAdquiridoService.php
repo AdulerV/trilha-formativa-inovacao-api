@@ -10,13 +10,6 @@ class DistintivoAdquiridoService
 
     /**
      * Registra a conquista do distintivo.
-     *
-     * Idempotente: conceder de novo um distintivo que o usuário já
-     * possui não é erro, é o mesmo estado final. A verificação de
-     * conquista roda a cada conclusão de tarefa com 100%, então esse
-     * caso acontece naturalmente — e recusá-lo com 400 fazia a tela de
-     * conclusão exibir falha em uma operação que não tinha nada de
-     * errado.
      */
     public function salvar(DistintivoAdquirido $distintivoAdquirido): bool
     {

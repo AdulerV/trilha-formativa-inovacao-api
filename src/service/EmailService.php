@@ -269,14 +269,6 @@ HTML;
 
     /**
      * Envia o código de verificação de e-mail usado no cadastro.
-     *
-     * Recebe o endereço em vez de um objeto Usuario porque, neste
-     * ponto do fluxo, a conta ainda não existe: é justamente disso que
-     * se trata a verificação.
-     *
-     * O código aparece grande e espaçado no corpo da mensagem porque
-     * será digitado à mão — e a fonte monoespaçada evita a confusão
-     * clássica entre 0 e O, 1 e l.
      */
     public function enviarCodigoVerificacao(
         string $destinatario,

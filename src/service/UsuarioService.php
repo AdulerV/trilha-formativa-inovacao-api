@@ -50,16 +50,6 @@ class UsuarioService
 
     /**
      * Cria a conta, exigindo que o e-mail já tenha sido verificado.
-     *
-     * O comprovante é consumido ANTES do INSERT, e não depois, por um
-     * motivo de ordem: consumir depois deixaria a janela em que duas
-     * requisições simultâneas com o mesmo comprovante passariam pela
-     * verificação e criariam duas contas. Consumindo antes, o UPDATE
-     * condicional do DAO garante que apenas uma siga adiante.
-     *
-     * O custo dessa ordem é que uma falha no INSERT queima o
-     * comprovante e obriga o usuário a pedir um código novo. É o lado
-     * seguro para errar.
      */
     public function salvar(Usuario $usuario, ?string $comprovanteVerificacao = null): void
     {
@@ -77,10 +67,6 @@ class UsuarioService
 
     /**
      * Remove a foto de perfil do usuário.
-     *
-     * Apaga o arquivo do disco antes de limpar a referência: se a
-     * ordem fosse invertida e a limpeza falhasse, o banco apontaria
-     * para um arquivo que não existe mais.
      */
     public function removerFotoPerfil(int $idUsuario, UploadService $uploadService): void
     {
@@ -100,7 +86,6 @@ class UsuarioService
 
         $this->usuarioDAO->atualizarFotoPerfil($idUsuario, "");
     }
-
 
     public function buscarPorId(int $idUsuario): Usuario
     {

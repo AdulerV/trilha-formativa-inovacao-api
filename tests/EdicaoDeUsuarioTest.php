@@ -6,21 +6,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Regras da edição de perfil.
- *
- * A alteração de senha na edição é OPCIONAL. O que impedia isso de
- * funcionar:
- *
- *  - o construtor exigia `string $senha`, então uma atualização sem
- *    senha nova nem podia ser montada;
- *  - UsuarioDTO::create lia `$dados["senha"] ?? $dados["novaSenha"]` e,
- *    sem nenhuma das duas chaves, passava null a um parâmetro `string`
- *    — TypeError, que não é Exception e escapava dos catch do
- *    controller, virando 500 sem corpo;
- *  - o UPDATE do DAO sempre sobrescrevia HashSenha, o que forçava o
- *    frontend a reenviar alguma senha em toda edição.
- *
- * A política de senha continua íntegra: qualquer senha informada passa
- * pelas mesmas regras do cadastro e da redefinição.
  */
 class EdicaoDeUsuarioTest extends TestCase
 {

@@ -2,27 +2,10 @@
 
 declare(strict_types=1);
 
-/**
- * Representa uma verificação de e-mail anterior ao cadastro.
- *
- * Diferença estrutural em relação à RecuperacaoSenha: aqui não existe
- * usuário ainda. A verificação é vinculada ao endereço de e-mail, não a
- * um IdUsuario, porque o objetivo é justamente confirmar que o endereço
- * é válido e pertence a quem está preenchendo o formulário antes de a
- * conta nascer.
- *
- * O ciclo de vida tem três estados:
- *
- *   1. emitido    — código enviado, aguardando confirmação
- *   2. verificado — código conferido; um comprovante foi emitido
- *   3. consumido  — comprovante trocado por uma conta, ou invalidado
- */
 class VerificacaoEmail
 {
-    /** Quantidade de dígitos do código enviado por e-mail. */
     public const TAMANHO_CODIGO = 6;
 
-    /** Bytes aleatórios do comprovante devolvido após a confirmação. */
     public const TAMANHO_COMPROVANTE_BYTES = 32;
 
     private ?int $idVerificacaoEmail = null;
@@ -63,18 +46,6 @@ class VerificacaoEmail
         $this->setEnderecoIp($enderecoIp);
     }
 
-    /**
-     * Gera o código de seis dígitos.
-     *
-     * random_int usa o gerador criptográfico do sistema. rand() e
-     * mt_rand() seriam previsíveis a partir de algumas amostras, o que
-     * derrubaria todo o mecanismo: quem prevê o gerador não precisa nem
-     * receber o e-mail.
-     *
-     * O zero à esquerda é preservado — "007321" é um código válido e
-     * tratar o valor como inteiro em algum ponto do caminho o
-     * transformaria em "7321", quebrando a conferência.
-     */
     public static function gerarCodigo(): string
     {
         $maximo = (10 ** self::TAMANHO_CODIGO) - 1;
@@ -87,31 +58,11 @@ class VerificacaoEmail
         );
     }
 
-    /**
-     * Gera o comprovante entregue ao frontend após a confirmação.
-     *
-     * Diferente do código, este valor não é digitado por ninguém: pode
-     * (e deve) ter entropia alta, 256 bits, porque é ele que autoriza a
-     * criação da conta.
-     */
     public static function gerarComprovante(): string
     {
         return bin2hex(random_bytes(self::TAMANHO_COMPROVANTE_BYTES));
     }
 
-    /**
-     * Resumo persistido de código e comprovante.
-     *
-     * Atenção ao limite desta proteção no caso do código: com apenas
-     * 10^6 combinações, quem obtiver o banco reverte o resumo por força
-     * bruta em segundos. O hash aqui protege contra exposição casual
-     * (dump, log, backup), não contra um atacante com a base em mãos.
-     *
-     * A defesa real do código de seis dígitos é o limite de tentativas
-     * somado ao prazo curto de validade — ver VerificacaoEmailService.
-     * Para endurecer, troque por hash_hmac com um segredo de aplicação
-     * ("pepper"), que impede a força bruta offline.
-     */
     public static function calcularHash(string $valor): string
     {
         return hash("sha256", $valor);
@@ -175,9 +126,6 @@ class VerificacaoEmail
         return $maximo > 0 && $this->tentativas >= $maximo;
     }
 
-    /**
-     * A verificação ainda pode receber uma tentativa de código?
-     */
     public function aceitaCodigo(int $maximoTentativas, ?DateTime $referencia = null): bool
     {
         return !$this->foiConsumido()
@@ -186,9 +134,6 @@ class VerificacaoEmail
             && !$this->excedeuTentativas($maximoTentativas);
     }
 
-    /**
-     * O comprovante ainda vale para criar a conta?
-     */
     public function comprovanteEstaValido(?DateTime $referencia = null): bool
     {
         $referencia = $referencia ?? new DateTime();
@@ -200,14 +145,6 @@ class VerificacaoEmail
             && $this->dataExpiracaoComprovante > $referencia;
     }
 
-    /**
-     * Confere o código em tempo constante.
-     *
-     * hash_equals evita o ataque de temporização: uma comparação comum
-     * com === retorna mais rápido quando os primeiros caracteres já
-     * diferem, e essa diferença é mensurável o suficiente para reduzir
-     * o espaço de busca dígito a dígito.
-     */
     public function codigoConfere(string $codigo): bool
     {
         return hash_equals($this->hashCodigo, self::calcularHash(trim($codigo)));

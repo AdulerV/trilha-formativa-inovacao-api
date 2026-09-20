@@ -6,12 +6,6 @@ class UploadService
 {
     /**
      * Prefixo público das imagens de perfil.
-     *
-     * É o caminho pelo qual o servidor realmente entrega o arquivo
-     * (public/image/upload/perfil/...). O valor gravado no banco
-     * passou a ser esse mesmo caminho: antes gravava-se
-     * "uploads/perfis/...", que não corresponde a nenhuma URL servida,
-     * e o frontend precisava remontar a pasta por conta própria.
      */
     public const PREFIXO_PUBLICO_PERFIL = 'image/upload/perfil/';
 

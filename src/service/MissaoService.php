@@ -4,7 +4,6 @@ class MissaoService
     private MissaoDAO $missaoDAO;
     private QuestaoService $questaoService;
 
-
     public function __construct(MissaoDAO $missaoDAO, QuestaoService $questaoService)
     {
         $this->missaoDAO = $missaoDAO;

@@ -6,8 +6,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Cobertura da verificação de e-mail anterior ao cadastro.
- *
  * O foco dos casos abaixo é o que diferencia este fluxo do de
  * recuperação de senha: o segredo tem seis dígitos, então o limite de
  * tentativas, o prazo e o teto de emissões precisam estar de pé.

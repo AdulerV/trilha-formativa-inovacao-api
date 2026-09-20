@@ -59,7 +59,6 @@ class QuestaoService
         return $this->questaoDAO->listar();
     }
 
-
     public function listarPorMissao(int $idMissao): array
     {
         $this->validarMissao($idMissao);

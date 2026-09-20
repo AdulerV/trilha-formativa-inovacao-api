@@ -32,12 +32,6 @@ class AlternativaMarcadaController
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
         } catch (Throwable $e) {
-            /*
-             * A mensagem genérica protege o usuário, mas o motivo
-             * precisa ficar registrado: era exatamente essa perda
-             * de informação que tornava o 500 impossível de
-             * diagnosticar.
-             */
             error_log(sprintf(
                 "[AlternativaMarcada] %s: %s em %s:%d",
                 get_class($e),
@@ -46,14 +40,6 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            // Falha inesperada: o motivo fica no log, e a resposta
-            // leva uma mensagem genérica com 500.
-            //
-            // Devolver $e->getMessage() com 400 fazia duas coisas
-            // ruins de uma vez: expunha texto técnico (caminho de
-            // arquivo, erro de PDO) e disfarçava a falha de regra de
-            // negócio, já que o frontend usa a faixa 4xx para decidir
-            // se a mensagem da API pode ser mostrada ao usuário.
             Response::error(
                 "Não foi possível concluir a operação. Tente novamente mais tarde.",
                 500
@@ -72,12 +58,6 @@ class AlternativaMarcadaController
 
             Response::json($resultado);
         } catch (Throwable $e) {
-            /*
-             * A mensagem genérica protege o usuário, mas o motivo
-             * precisa ficar registrado: era exatamente essa perda
-             * de informação que tornava o 500 impossível de
-             * diagnosticar.
-             */
             error_log(sprintf(
                 "[AlternativaMarcada] %s: %s em %s:%d",
                 get_class($e),
@@ -86,14 +66,6 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            // Falha inesperada: o motivo fica no log, e a resposta
-            // leva uma mensagem genérica com 500.
-            //
-            // Devolver $e->getMessage() com 400 fazia duas coisas
-            // ruins de uma vez: expunha texto técnico (caminho de
-            // arquivo, erro de PDO) e disfarçava a falha de regra de
-            // negócio, já que o frontend usa a faixa 4xx para decidir
-            // se a mensagem da API pode ser mostrada ao usuário.
             Response::error(
                 "Não foi possível concluir a operação. Tente novamente mais tarde.",
                 500
@@ -112,12 +84,6 @@ class AlternativaMarcadaController
 
             Response::json($resultado);
         } catch (Throwable $e) {
-            /*
-             * A mensagem genérica protege o usuário, mas o motivo
-             * precisa ficar registrado: era exatamente essa perda
-             * de informação que tornava o 500 impossível de
-             * diagnosticar.
-             */
             error_log(sprintf(
                 "[AlternativaMarcada] %s: %s em %s:%d",
                 get_class($e),
@@ -126,14 +92,6 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            // Falha inesperada: o motivo fica no log, e a resposta
-            // leva uma mensagem genérica com 500.
-            //
-            // Devolver $e->getMessage() com 400 fazia duas coisas
-            // ruins de uma vez: expunha texto técnico (caminho de
-            // arquivo, erro de PDO) e disfarçava a falha de regra de
-            // negócio, já que o frontend usa a faixa 4xx para decidir
-            // se a mensagem da API pode ser mostrada ao usuário.
             Response::error(
                 "Não foi possível concluir a operação. Tente novamente mais tarde.",
                 500
@@ -152,12 +110,6 @@ class AlternativaMarcadaController
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 404);
         } catch (Throwable $e) {
-            /*
-             * A mensagem genérica protege o usuário, mas o motivo
-             * precisa ficar registrado: era exatamente essa perda
-             * de informação que tornava o 500 impossível de
-             * diagnosticar.
-             */
             error_log(sprintf(
                 "[AlternativaMarcada] %s: %s em %s:%d",
                 get_class($e),
@@ -166,14 +118,6 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            // Falha inesperada: o motivo fica no log, e a resposta
-            // leva uma mensagem genérica com 500.
-            //
-            // Devolver $e->getMessage() com 400 fazia duas coisas
-            // ruins de uma vez: expunha texto técnico (caminho de
-            // arquivo, erro de PDO) e disfarçava a falha de regra de
-            // negócio, já que o frontend usa a faixa 4xx para decidir
-            // se a mensagem da API pode ser mostrada ao usuário.
             Response::error(
                 "Não foi possível concluir a operação. Tente novamente mais tarde.",
                 500
@@ -198,12 +142,6 @@ class AlternativaMarcadaController
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
         } catch (Throwable $e) {
-            /*
-             * A mensagem genérica protege o usuário, mas o motivo
-             * precisa ficar registrado: era exatamente essa perda
-             * de informação que tornava o 500 impossível de
-             * diagnosticar.
-             */
             error_log(sprintf(
                 "[AlternativaMarcada] %s: %s em %s:%d",
                 get_class($e),
@@ -212,14 +150,6 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            // Falha inesperada: o motivo fica no log, e a resposta
-            // leva uma mensagem genérica com 500.
-            //
-            // Devolver $e->getMessage() com 400 fazia duas coisas
-            // ruins de uma vez: expunha texto técnico (caminho de
-            // arquivo, erro de PDO) e disfarçava a falha de regra de
-            // negócio, já que o frontend usa a faixa 4xx para decidir
-            // se a mensagem da API pode ser mostrada ao usuário.
             Response::error(
                 "Não foi possível concluir a operação. Tente novamente mais tarde.",
                 500
@@ -227,14 +157,6 @@ class AlternativaMarcadaController
         }
     }
 
-    /**
-     * O Router entrega os parâmetros da rota como argumentos posicionais
-     * (call_user_func_array com os grupos do regex). A assinatura
-     * anterior recebia um array e, ao chegar um int, o PHP lançava
-     * TypeError — que não é Exception e escapava dos catch, derrubando
-     * a requisição com 500 sem corpo. O DELETE de alternativa marcada
-     * nunca funcionou.
-     */
     public function deletar(int $idUsuario, int $idAlternativa): void
     {
         try {
@@ -248,12 +170,6 @@ class AlternativaMarcadaController
         } catch (RegraDeNegocioException $e) {
             Response::error($e->getMessage(), 400);
         } catch (Throwable $e) {
-            /*
-             * A mensagem genérica protege o usuário, mas o motivo
-             * precisa ficar registrado: era exatamente essa perda
-             * de informação que tornava o 500 impossível de
-             * diagnosticar.
-             */
             error_log(sprintf(
                 "[AlternativaMarcada] %s: %s em %s:%d",
                 get_class($e),
@@ -262,14 +178,6 @@ class AlternativaMarcadaController
                 $e->getLine()
             ));
 
-            // Falha inesperada: o motivo fica no log, e a resposta
-            // leva uma mensagem genérica com 500.
-            //
-            // Devolver $e->getMessage() com 400 fazia duas coisas
-            // ruins de uma vez: expunha texto técnico (caminho de
-            // arquivo, erro de PDO) e disfarçava a falha de regra de
-            // negócio, já que o frontend usa a faixa 4xx para decidir
-            // se a mensagem da API pode ser mostrada ao usuário.
             Response::error(
                 "Não foi possível concluir a operação. Tente novamente mais tarde.",
                 500

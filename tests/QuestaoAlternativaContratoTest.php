@@ -6,15 +6,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Contrato entre o cadastro de questões do frontend e a API.
- *
- * Dois pontos travados aqui:
- *
- *  1. O POST precisa devolver o ID gerado. Sem isso o frontend listava
- *     todas as questões para reencontrar a que acabara de criar.
- *
- *  2. A alternativa associada é LIDA com a chave "id" e era ESCRITA com
- *     "idAlternativaAssociada". Reenviar para edição o objeto recebido
- *     da API perdia o ID e recriava o par em vez de atualizá-lo.
  */
 class QuestaoAlternativaContratoTest extends TestCase
 {
@@ -72,10 +63,6 @@ class QuestaoAlternativaContratoTest extends TestCase
     {
         $missao = $this->criarMissaoQuiz();
 
-        /*
-         * "correta" não era repassado por QuestaoDTO::create e isso
-         * fazia a criação conjunta falhar sempre.
-         */
         $questao = QuestaoDTO::create([
             "enunciado" => "O que é normalização?",
             "mensagemCorrecao" => "Reveja o material.",

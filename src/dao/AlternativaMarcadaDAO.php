@@ -12,16 +12,11 @@ class AlternativaMarcadaDAO
     }
 
     /**
-     * Grava a marcação, substituindo a anterior da mesma alternativa.
-     *
      * A chave primária de alternativa_marcada é (IdUsuario,
      * IdAlternativa): ao responder o quiz de novo, o INSERT puro
      * violava a chave e o serviço devolvia "Esta alternativa já foi
      * marcada por este usuário!". O resultado era que apenas a
      * primeira tentativa ficava salva.
-     *
-     * ON DUPLICATE KEY UPDATE resolve em uma única instrução, sem a
-     * janela de corrida de um "verifica e depois grava".
      */
     public function salvar(AlternativaMarcada $alternativaMarcada): void
     {
