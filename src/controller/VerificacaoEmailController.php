@@ -12,8 +12,9 @@ class VerificacaoEmailController
     /**
      * POST /api/v1/verificacao-email/solicitar
      *
-     * Primeira etapa do cadastro: o frontend envia o e-mail digitado no
-     * formulário e a API dispara o código de seis dígitos.
+     * Primeira etapa do cadastro (ou da troca de e-mail na edição): o
+     * frontend envia o e-mail digitado no formulário e a API dispara o
+     * código de seis dígitos.
      */
     public function solicitar(): void
     {
@@ -22,7 +23,17 @@ class VerificacaoEmailController
 
             $correioEletronico = (string) ($dados["correioEletronico"] ?? $dados["email"] ?? "");
 
-            $this->service->solicitar($correioEletronico, $this->descobrirEnderecoIp());
+            /*
+             * "cadastro" (padrão) ou "alteracao", quando o usuário troca
+             * o e-mail na edição do perfil. Só muda o texto do e-mail.
+             */
+            $finalidade = (string) ($dados["finalidade"] ?? VerificacaoEmailService::FINALIDADE_CADASTRO);
+
+            $this->service->solicitar(
+                $correioEletronico,
+                $this->descobrirEnderecoIp(),
+                $finalidade
+            );
 
             Response::json([
                 "mensagem" => "Código de verificação enviado para o e-mail informado.",

@@ -9,8 +9,8 @@ class UsuarioService
      * O terceiro parâmetro é opcional apenas para que testes de
      * unidade que não exercitam o cadastro possam montar o serviço com
      * duas dependências. Em execução real ele SEMPRE é injetado
-     * (ver src/config/routes/usuario.php): sem ele, salvar() aceitaria
-     * qualquer e-mail sem verificação.
+     * (ver src/config/routes/usuario.php): sem ele, salvar() e
+     * atualizar() aceitariam qualquer e-mail sem verificação.
      */
     public function __construct(
         UsuarioDAO $usuarioDAO,
@@ -118,10 +118,38 @@ class UsuarioService
         return $this->usuarioDAO->listar();
     }
 
-    public function atualizar(Usuario $usuario): void
+    /**
+     * Atualiza o perfil. Trocar o e-mail exige a mesma verificação do
+     * cadastro: o comprovante emitido para o endereço NOVO é consumido
+     * antes do UPDATE, pelo mesmo motivo de ordem descrito em salvar().
+     *
+     * Manter o e-mail não exige comprovante, e a comparação ignora
+     * caixa e espaços, como o restante do fluxo de verificação.
+     */
+    public function atualizar(Usuario $usuario, ?string $comprovanteVerificacao = null): void
     {
         $this->validarAtualizacao($usuario);
+
+        if ($this->verificacaoEmailService !== null && $this->alterouCorreioEletronico($usuario)) {
+            $this->verificacaoEmailService->consumirComprovante(
+                $usuario->getCorreioEletronico(),
+                $comprovanteVerificacao
+            );
+        }
+
         $this->usuarioDAO->atualizar($usuario);
+    }
+
+    private function alterouCorreioEletronico(Usuario $usuario): bool
+    {
+        $usuarioAtual = $this->usuarioDAO->buscarPorId((int) $usuario->getIdUsuario());
+
+        if ($usuarioAtual === null) {
+            throw new RegraDeNegocioException("Usuário não encontrado!");
+        }
+
+        return strtolower(trim($usuarioAtual->getCorreioEletronico()))
+            !== strtolower(trim($usuario->getCorreioEletronico()));
     }
 
     public function deletar(int $idUsuario): void

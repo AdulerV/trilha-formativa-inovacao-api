@@ -236,7 +236,16 @@ class UsuarioController
                 );
             }
 
-            $this->service->atualizar(UsuarioDTO::create($dados, $id));
+            /*
+             * Exigido só quando o e-mail muda: é o comprovante emitido
+             * para o endereço novo por /verificacao-email/confirmar.
+             */
+            $this->service->atualizar(
+                UsuarioDTO::create($dados, $id),
+                isset($dados["comprovanteVerificacao"])
+                    ? (string) $dados["comprovanteVerificacao"]
+                    : null
+            );
 
             Response::json([
                 "mensagem" => "Usuario atualizado com sucesso!"
