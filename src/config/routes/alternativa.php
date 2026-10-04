@@ -24,16 +24,16 @@ $questaoService = new QuestaoService($questaoDAO, $missaoDAO, $alternativaServic
 
 $alternativaController = new AlternativaController($alternativaService, $questaoService);
 
-/* $auth = [[JwtMiddleware::class, 'verificar']];
+//$auth = [[JwtMiddleware::class, 'verificar']];
 
 $adminAuth = [
     [JwtMiddleware::class, 'verificar'],
     [AdminMiddleware::class, 'verificar']
-]; */
+];
 
-$router->add("GET", "/api/v1/alternativas", [$alternativaController, "listar"]);
-$router->add("GET", "/api/v1/questoes/{idQuestao}/alternativas", [$alternativaController, "listarPorQuestao"]);
-$router->add("GET", "/api/v1/questoes/{idQuestao}/alternativas/{idAlternativa}", [$alternativaController, "buscarPorId"]);
-$router->add("POST", "/api/v1/questoes/{idQuestao}/alternativas", [$alternativaController, "salvar"]);
-$router->add("PUT", "/api/v1/questoes/{idQuestao}/alternativas/{idAlternativa}", [$alternativaController, "atualizar"]);
-$router->add("DELETE", "/api/v1/questoes/{idQuestao}/alternativas/{idAlternativa}", [$alternativaController, "deletar"]);
+$router->add("GET", "/api/v1/alternativas", [$alternativaController, "listar"], $adminAuth);
+$router->add("GET", "/api/v1/questoes/{idQuestao}/alternativas", [$alternativaController, "listarPorQuestao"], $adminAuth);
+$router->add("GET", "/api/v1/questoes/{idQuestao}/alternativas/{idAlternativa}", [$alternativaController, "buscarPorId"], $adminAuth);
+$router->add("POST", "/api/v1/questoes/{idQuestao}/alternativas", [$alternativaController, "salvar"], $adminAuth);
+$router->add("PUT", "/api/v1/questoes/{idQuestao}/alternativas/{idAlternativa}", [$alternativaController, "atualizar"], $adminAuth);
+$router->add("DELETE", "/api/v1/questoes/{idQuestao}/alternativas/{idAlternativa}", [$alternativaController, "deletar"], $adminAuth);
