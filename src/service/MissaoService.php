@@ -91,5 +91,34 @@ class MissaoService
         )) {
             throw new RegraDeNegocioException("Título já utilizado por outra missão!");
         }
+
+        $this->validarDistintivoMantido($missao);
+    }
+
+    /**
+     * O distintivo de uma tarefa é definido no cadastro e não muda
+     * mais: aventureiros que já concluíram a tarefa receberam aquele
+     * distintivo, e trocá-lo deixaria o histórico apontando para uma
+     * conquista que a tarefa não concede mais.
+     */
+    private function validarDistintivoMantido(Missao $missao): void
+    {
+        if (!$missao instanceof MissaoAtividadeTarefa) {
+            return;
+        }
+
+        $missaoAtual = $this->missaoDAO->buscarPorId((int) $missao->getIdMissao());
+
+        if (!$missaoAtual instanceof MissaoAtividadeTarefa) {
+            return;
+        }
+
+        if ($missaoAtual->getDistintivo()->getIdDistintivo()
+            !== $missao->getDistintivo()->getIdDistintivo()
+        ) {
+            throw new RegraDeNegocioException(
+                "O distintivo da tarefa não pode ser alterado após o cadastro!"
+            );
+        }
     }
 }

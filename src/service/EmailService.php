@@ -268,11 +268,13 @@ HTML;
     }
 
     /**
-     * Envia o código de verificação de e-mail usado no cadastro.
+     * Envia o código de verificação de e-mail usado no cadastro e na
+     * troca de e-mail da edição de perfil.
      *
-     * Recebe o endereço em vez de um objeto Usuario porque, neste
-     * ponto do fluxo, a conta ainda não existe: é justamente disso que
-     * se trata a verificação.
+     * Recebe o endereço em vez de um objeto Usuario porque, no
+     * cadastro, a conta ainda não existe; na alteração, o endereço é o
+     * novo, que ainda não pertence a ninguém. A finalidade muda apenas
+     * a saudação e as frases que explicam o pedido.
      *
      * O código aparece grande e espaçado no corpo da mensagem porque
      * será digitado à mão — e a fonte monoespaçada evita a confusão
@@ -281,8 +283,21 @@ HTML;
     public function enviarCodigoVerificacao(
         string $destinatario,
         string $codigo,
-        int $minutosDeValidade
+        int $minutosDeValidade,
+        string $finalidade = VerificacaoEmailService::FINALIDADE_CADASTRO
     ): void {
+        $alteracao = $finalidade === VerificacaoEmailService::FINALIDADE_ALTERACAO;
+
+        $saudacao = $alteracao ? "Olá, aventureiro!" : "Olá, futuro aventureiro!";
+
+        $motivo = $alteracao
+            ? "Para alterar o e-mail da sua conta na plataforma"
+            : "Para concluir seu cadastro na plataforma";
+
+        $aviso = $alteracao
+            ? "Se você não pediu para alterar o e-mail da sua conta, pode ignorar este e-mail. Nenhuma alteração será feita sem que o código acima seja informado."
+            : "Se você não tentou criar uma conta na plataforma, pode ignorar este e-mail. Nenhum cadastro será feito sem que o código acima seja informado.";
+
         $codigoSeguro = htmlspecialchars(
             $codigo,
             ENT_QUOTES,
@@ -348,7 +363,7 @@ HTML;
                 line-height: 1.6;
                 color: #281d15;
             ">
-                Olá, futuro aventureiro!
+                {$saudacao}
             </p>
 
             <p style="
@@ -357,7 +372,7 @@ HTML;
                 line-height: 1.6;
                 color: #281d15;
             ">
-                Para concluir seu cadastro na plataforma
+                {$motivo}
                 <strong>{$nomeAplicacao}</strong>, confirme este
                 endereço de e-mail informando o código abaixo:
             </p>
@@ -412,9 +427,7 @@ HTML;
                 line-height: 1.6;
                 color: #281d15;
             ">
-                Se você não tentou criar uma conta na plataforma, pode
-                ignorar este e-mail. Nenhum cadastro será feito sem que
-                o código acima seja informado.
+                {$aviso}
             </p>
 
         </div>
@@ -442,15 +455,13 @@ HTML;
 </html>
 HTML;
 
-        $corpoTexto = "Olá, futuro aventureiro!\n\n"
-            . "Para concluir seu cadastro na plataforma {$this->nomeAplicacao}, "
+        $corpoTexto = "{$saudacao}\n\n"
+            . "{$motivo} {$this->nomeAplicacao}, "
             . "confirme este endereço de e-mail informando o código abaixo:\n\n"
             . "    {$codigo}\n\n"
             . "O código expira em {$minutosDeValidade} minutos e só pode "
             . "ser usado uma vez.\n\n"
-            . "Se você não tentou criar uma conta na plataforma, pode ignorar "
-            . "este e-mail. Nenhum cadastro será feito sem que o código acima "
-            . "seja informado.";
+            . $aviso;
 
         $this->enviar(
             $destinatario,

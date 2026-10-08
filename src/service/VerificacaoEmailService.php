@@ -30,6 +30,15 @@ class VerificacaoEmailService
     public const MENSAGEM_EMAIL_EM_USO = "Este e-mail já está cadastrado.";
     public const MENSAGEM_LIMITE_SOLICITACOES = "Muitas solicitações para este e-mail. Aguarde alguns minutos antes de tentar novamente.";
     public const MENSAGEM_COMPROVANTE_INVALIDO = "Verificação de e-mail ausente ou expirada. Solicite um novo código.";
+    public const MENSAGEM_FINALIDADE_INVALIDA = "Finalidade da verificação de e-mail inválida!";
+
+    /**
+     * Para que o código está sendo pedido. Muda apenas o texto do
+     * e-mail: o código, o comprovante e os limites são os mesmos nos
+     * dois casos, e o comprovante só vale para o endereço verificado.
+     */
+    public const FINALIDADE_CADASTRO = "cadastro";
+    public const FINALIDADE_ALTERACAO = "alteracao";
 
     public const MINUTOS_DE_VALIDADE_PADRAO = 15;
     public const MAXIMO_TENTATIVAS_PADRAO = 5;
@@ -89,13 +98,26 @@ class VerificacaoEmailService
      * endpoint não protegeria segredo nenhum e só deixaria o usuário
      * sem saber por que o cadastro não avança.
      */
-    public function solicitar(string $correioEletronico, ?string $enderecoIp = null): void
-    {
+    public function solicitar(
+        string $correioEletronico,
+        ?string $enderecoIp = null,
+        string $finalidade = self::FINALIDADE_CADASTRO
+    ): void {
         $correioEletronico = strtolower(trim($correioEletronico));
 
         if ($correioEletronico === "" || !filter_var($correioEletronico, FILTER_VALIDATE_EMAIL)) {
             throw new DomainException("E-mail inválido!");
         }
+
+        if (!in_array($finalidade, [self::FINALIDADE_CADASTRO, self::FINALIDADE_ALTERACAO], true)) {
+            throw new DomainException(self::MENSAGEM_FINALIDADE_INVALIDA);
+        }
+
+        /*
+         * Vale também para a alteração: o endereço novo não pode
+         * pertencer a outra conta, e o próprio endereço atual nunca
+         * chega aqui, porque manter o e-mail não exige verificação.
+         */
 
         if ($this->usuarioDAO->verificarCorreioEletronicoExiste($correioEletronico)) {
             throw new RegraDeNegocioException(self::MENSAGEM_EMAIL_EM_USO);
@@ -119,7 +141,8 @@ class VerificacaoEmailService
             $this->emailService->enviarCodigoVerificacao(
                 $correioEletronico,
                 $codigo,
-                $this->minutosDeValidade
+                $this->minutosDeValidade,
+                $finalidade
             );
         } catch (Throwable $e) {
             // Sem e-mail entregue não há como o usuário prosseguir, e
@@ -195,13 +218,13 @@ class VerificacaoEmailService
     }
 
     /**
-     * Troca o comprovante pela autorização de criar a conta.
+     * Troca o comprovante pela autorização de gravar o e-mail.
      *
-     * Chamado pelo UsuarioService dentro do cadastro. O consumo é
-     * atômico, então o mesmo comprovante não cria duas contas, e o
-     * e-mail do comprovante precisa ser exatamente o do cadastro — sem
-     * essa conferência alguém verificaria o próprio endereço e
-     * cadastraria outro.
+     * Chamado pelo UsuarioService no cadastro e na edição que altera o
+     * e-mail. O consumo é atômico, então o mesmo comprovante não é
+     * usado duas vezes, e o e-mail do comprovante precisa ser
+     * exatamente o que será gravado — sem essa conferência alguém
+     * verificaria o próprio endereço e gravaria outro.
      */
     public function consumirComprovante(string $correioEletronico, ?string $comprovante): void
     {
