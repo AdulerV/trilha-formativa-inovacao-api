@@ -9,7 +9,8 @@ class CorsMiddleware
     public static function aplicar(): void
     {
         // Removida a barra '/' do final da URL
-        header("Access-Control-Allow-Origin: https://sisgame.jf.ifsudestemg.edu.br");
+        header("Access-Control-Allow-Origin: http://localhost:5173");
+        // http://localhost:5173 ou https://sisgame.jf.ifsudestemg.edu.br
         
         header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
         header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Access-Control-Request-Private-Network");
