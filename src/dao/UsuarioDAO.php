@@ -54,7 +54,8 @@ class UsuarioDAO
             FROM usuario AS u 
             INNER JOIN ocupacao AS o 
             ON u.IdOcupacao = o.IdOcupacao 
-            WHERE u.IdUsuario = :idUsuario";
+            WHERE u.IdUsuario = :idUsuario
+            AND u.Admin != 1";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idUsuario", $idUsuario);
@@ -127,7 +128,8 @@ class UsuarioDAO
             o.Titulo
             FROM usuario AS u 
             INNER JOIN ocupacao AS o 
-            ON u.IdOcupacao = o.IdOcupacao";
+            ON u.IdOcupacao = o.IdOcupacao
+            WHERE u.Admin != 1";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();

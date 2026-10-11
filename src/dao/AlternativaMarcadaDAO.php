@@ -76,7 +76,7 @@ class AlternativaMarcadaDAO
                 LEFT JOIN alternativa_ordenacao ao ON a.IdAlternativa = ao.IdAlternativa
                 LEFT JOIN alternativa_associacao aa ON a.IdAlternativa = aa.IdAlternativa
                 LEFT JOIN alternativa alt_vinculada ON aa.IdAlternativaAssociada = alt_vinculada.IdAlternativa
-                WHERE am.IdUsuario = :idUsuario AND am.IdAlternativa = :idAlternativa";
+                WHERE am.IdUsuario = :idUsuario AND am.IdAlternativa = :idAlternativa AND u.Admin != 1";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idUsuario", $idUsuario);
@@ -113,7 +113,8 @@ class AlternativaMarcadaDAO
                 LEFT JOIN alternativa_multipla_escolha ame ON a.IdAlternativa = ame.IdAlternativa
                 LEFT JOIN alternativa_ordenacao ao ON a.IdAlternativa = ao.IdAlternativa
                 LEFT JOIN alternativa_associacao aa ON a.IdAlternativa = aa.IdAlternativa
-                LEFT JOIN alternativa alt_vinculada ON aa.IdAlternativaAssociada = alt_vinculada.IdAlternativa";
+                LEFT JOIN alternativa alt_vinculada ON aa.IdAlternativaAssociada = alt_vinculada.IdAlternativa
+                WHERE u.Admin != 1";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
@@ -150,7 +151,7 @@ class AlternativaMarcadaDAO
                 LEFT JOIN alternativa_ordenacao ao ON a.IdAlternativa = ao.IdAlternativa
                 LEFT JOIN alternativa_associacao aa ON a.IdAlternativa = aa.IdAlternativa
                 LEFT JOIN alternativa alt_vinculada ON aa.IdAlternativaAssociada = alt_vinculada.IdAlternativa
-                WHERE am.IdUsuario = :idUsuario";
+                WHERE am.IdUsuario = :idUsuario AND u.Admin != 1";
 
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(":idUsuario", $idUsuario);
