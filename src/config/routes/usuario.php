@@ -33,4 +33,9 @@ $router->add("GET", "/api/v1/usuarios/{idUsuario}", [$usuarioController, "buscar
 $router->add("PUT", "/api/v1/usuarios/{idUsuario}", [$usuarioController, "atualizar"], $auth);
 $router->add("DELETE", "/api/v1/usuarios/{idUsuario}", [$usuarioController, "deletar"], $auth);
 
-$router->add("PATCH", "/api/v1/usuarios/{idUsuario}/primeiro-acesso",[$usuarioController, "alterarPrimeiroAcesso"], $auth);
+$router->add(
+    "POST",
+    "/api/v1/usuarios/{idUsuario}/primeiro-acesso",
+    [$usuarioController, "alterarPrimeiroAcesso"],
+    $auth
+);
